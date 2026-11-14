@@ -3034,7 +3034,9 @@ export class TicketEditorComponent implements OnDestroy {
       const d = structuredClone(cur);
       d.width = width;
       d.height = height;
-      if (typeName) d.type = typeName as DesignType;
+      // typeName is the canvas preset id (e.g. "compact"), not the API DesignType.
+      // Changing canvas dimensions must not overwrite the design's ticket category.
+      d.config.type = d.type;
       if (!d.config.canvas) d.config.canvas = { width, height };
       d.config.canvas.width = width;
       d.config.canvas.height = height;
