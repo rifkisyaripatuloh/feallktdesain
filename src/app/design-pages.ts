@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnDestroy } from '@angular/core';
+import { Component, inject, signal, computed, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -58,6 +58,148 @@ export const ticketNoStyles = [
   { id: 'gold', label: 'VIP Luxury Gold', desc: 'Aksen emas mewah premium', icon: '👑', bg: '#1c1917', border: '#eab308', radius: 4, borderWidth: 1.5, color: '#fef08a' },
   { id: 'invert', label: 'Hitam Pekat', desc: 'Latar pekat solid kontras', icon: '⬛', bg: '#09090b', border: '#27272a', radius: 6, borderWidth: 1, color: '#ffffff' },
   { id: 'stamp', label: 'Stempel Tiket', desc: 'Garis ganda stempel resmi', icon: '🏷', bg: '#fff1f2', border: '#dc2626', radius: 4, borderWidth: 3, color: '#dc2626' }
+];
+
+export interface CanvasPreset {
+  id: string;
+  name: string;
+  width: number;
+  height: number;
+  badge: string;
+  icon: string;
+}
+
+export const canvasPresets: CanvasPreset[] = [
+  { id: 'standard', name: 'Standar Event', width: 1050, height: 600, badge: '7:4', icon: '🎟' },
+  { id: 'compact', name: 'Kompak / Konser', width: 900, height: 420, badge: '2:1', icon: '🎫' },
+  { id: 'boarding', name: 'Boarding Pass', width: 1200, height: 500, badge: 'Wide', icon: '✈️' },
+  { id: 'wristband', name: 'Gelang / Strip', width: 800, height: 300, badge: 'Slim', icon: '🏷' },
+  { id: 'a4', name: 'A4 Lembar Cetak', width: 1120, height: 790, badge: 'A4', icon: '📄' },
+  { id: 'mobile', name: 'Digital / Mobile', width: 720, height: 1280, badge: '9:16', icon: '📱' },
+  { id: 'badge', name: 'ID Card / Pass', width: 650, height: 1000, badge: 'Badge', icon: '🪪' }
+];
+
+export interface AiThemeRecommendation {
+  id: string;
+  name: string;
+  category: string;
+  icon: string;
+  description: string;
+  width: number;
+  height: number;
+  background: string;
+  accent: string;
+  ink: string;
+  font: string;
+  ticketStyle: string;
+  badgeBg: string;
+  badgeBorder: string;
+  prompt: string;
+}
+
+export const aiRecommendations: AiThemeRecommendation[] = [
+  {
+    id: 'rock-neon',
+    name: 'Neon Cyber Rock',
+    category: 'Konser Musik',
+    icon: '🎸',
+    description: 'Tema gelap energetik dengan aksen neon glowing untuk festival musik dan konser rock.',
+    width: 1050,
+    height: 600,
+    background: '#0d0f17',
+    accent: '#00f2fe',
+    ink: '#f8fafc',
+    font: 'Space Grotesk',
+    ticketStyle: 'neon',
+    badgeBg: '#1e1b4b',
+    badgeBorder: '#00f2fe',
+    prompt: 'Konser musik rock indie festival, panggung megah malam hari dengan tata lampu neon spektakuler'
+  },
+  {
+    id: 'luxury-gala',
+    name: 'Royal Gold Gala',
+    category: 'VIP & Gala Dinner',
+    icon: '👑',
+    description: 'Kemewahan elegan hitam keemasan dengan tipografi klasik untuk malam penghargaan eksklusif.',
+    width: 1050,
+    height: 600,
+    background: '#0a0d14',
+    accent: '#eab308',
+    ink: '#ffffff',
+    font: 'Playfair Display',
+    ticketStyle: 'gold',
+    badgeBg: '#1c1917',
+    badgeBorder: '#eab308',
+    prompt: 'Malam penganugerahan penghargaan mewah formal, champagne gold, ballroom eksklusif VIP'
+  },
+  {
+    id: 'indie-art',
+    name: 'Vintage Sunset Indie',
+    category: 'Festival Seni',
+    icon: '🎨',
+    description: 'Nuansa hangat retro organik dengan palet terakota & krem estetik.',
+    width: 900,
+    height: 420,
+    background: '#fdf8f0',
+    accent: '#ea580c',
+    ink: '#1c1917',
+    font: 'Syne',
+    ticketStyle: 'stamp',
+    badgeBg: '#ffedd5',
+    badgeBorder: '#ea580c',
+    prompt: 'Festival seni kreatif anak muda, pameran estetik sore hari, sentuhan vintage terakota'
+  },
+  {
+    id: 'tech-summit',
+    name: 'Tech Future Summit',
+    category: 'Seminar Bisnis',
+    icon: '💼',
+    description: 'Desain bersih profesional dengan biru royal korporat dan font geometris modern.',
+    width: 1050,
+    height: 600,
+    background: '#f8fafc',
+    accent: '#3b82f6',
+    ink: '#0f172a',
+    font: 'Inter',
+    ticketStyle: 'pill',
+    badgeBg: '#eff6ff',
+    badgeBorder: '#3b82f6',
+    prompt: 'Konferensi teknologi kecerdasan buatan, summit eksekutif bisnis modern, startup inovasi'
+  },
+  {
+    id: 'cinema-classic',
+    name: 'Classic Cinema Pass',
+    category: 'Bioskop & Teater',
+    icon: '🎟',
+    description: 'Gaya karcis bioskop vintage dengan warna merah marun klasik dan border putus-putus kupon.',
+    width: 900,
+    height: 420,
+    background: '#1a0b0e',
+    accent: '#ef4444',
+    ink: '#fef2f2',
+    font: 'Space Mono',
+    ticketStyle: 'dashed',
+    badgeBg: '#450a0a',
+    badgeBorder: '#ef4444',
+    prompt: 'Pemutaran film premier layar lebar bioskop antik, pertunjukan seni teater drama panggung'
+  },
+  {
+    id: 'cyber-edm',
+    name: 'Ultra Violet Rave',
+    category: 'EDM & Party',
+    icon: '⚡',
+    description: 'Dentuman bass neon ultraviolet dan magenta untuk pesta malam rave clubbing spektakuler.',
+    width: 1200,
+    height: 500,
+    background: '#090514',
+    accent: '#d946ef',
+    ink: '#fdf4ff',
+    font: 'Orbitron',
+    ticketStyle: 'neon',
+    badgeBg: '#2e1065',
+    badgeBorder: '#d946ef',
+    prompt: 'Pesta dansa musik elektronik EDM rave midnight clubbing laser show spektakuler'
+  }
 ];
 
 @Component({
@@ -178,7 +320,7 @@ export const ticketNoStyles = [
         }
 
         <footer class="dash-foot">
-          <span>© 2025 TICKETFORGE AI</span>
+          <span>© 2026 TICKETFORGE AI</span>
           <span>STUDIO DESAIN KANVAS FIGMA STYLE <b>✳</b></span>
         </footer>
       </main>
@@ -496,14 +638,106 @@ export class DesignsListComponent {
           <span class="topbar-divider"></span>
           @if (design()) {
             <input class="figma-file-name" [value]="design()!.name" (change)="rename($event)" title="Klik untuk mengubah nama desain">
-            <span class="figma-badge">{{ design()!.type }} · {{ design()!.width }} × {{ design()!.height }} px</span>
+            
+            <div class="topbar-dimension-control" title="Ubah Ukuran Lebar & Tinggi Kanvas Tiket">
+              <span class="dim-icon">📐</span>
+              <div class="dim-inputs-group">
+                <input
+                  type="number"
+                  class="dim-num-input"
+                  [value]="design()!.width"
+                  (change)="onCanvasDimensionChange('width', $event)"
+                  title="Lebar Kanvas (px)"
+                  min="200"
+                  max="4000"
+                >
+                <span class="dim-cross">×</span>
+                <input
+                  type="number"
+                  class="dim-num-input"
+                  [value]="design()!.height"
+                  (change)="onCanvasDimensionChange('height', $event)"
+                  title="Tinggi Kanvas (px)"
+                  min="150"
+                  max="4000"
+                >
+                <span class="dim-unit">px</span>
+              </div>
+
+              <!-- Quick Presets Dropdown -->
+              <select
+                class="dim-presets-select"
+                (change)="onPresetSelectChange($event)"
+                title="Pilih Ukuran Standar Tiket"
+              >
+                <option value="" disabled selected>Preset Ukuran</option>
+                @for (p of canvasPresets; track p.id) {
+                  <option [value]="p.width + 'x' + p.height + '|' + p.id">
+                    {{ p.icon }} {{ p.name }} ({{ p.width }}×{{ p.height }})
+                  </option>
+                }
+              </select>
+            </div>
           }
         </div>
 
         <div class="topbar-center">
+          <div class="figma-dock">
+            <!-- Undo & Redo Controls -->
+            <button
+              type="button"
+              class="figma-dock-item"
+              [disabled]="!canUndo()"
+              [class.disabled-item]="!canUndo()"
+              (click)="undo()"
+              title="Undo / Urungkan (Ctrl+Z)"
+            >
+              <span class="dock-glyph">↶</span>
+            </button>
+            <button
+              type="button"
+              class="figma-dock-item"
+              [disabled]="!canRedo()"
+              [class.disabled-item]="!canRedo()"
+              (click)="redo()"
+              title="Redo / Majukan (Ctrl+Y / Ctrl+Shift+Z)"
+            >
+              <span class="dock-glyph">↷</span>
+            </button>
+            <span class="dock-sep"></span>
+
+            <!-- Figma Tools -->
+            <button type="button" class="figma-dock-item" [class.active]="activeTool() === 'select'" (click)="setTool('select')" title="Alat Pilih / Pindah (V)">
+              <span class="dock-glyph">↖</span>
+            </button>
+            <button type="button" class="figma-dock-item" [class.active]="activeTool() === 'pen'" (click)="setTool(activeTool() === 'pen' ? 'select' : 'pen')" title="Pen Tool: Tracing & Clipping Mask (P)">
+              <span class="dock-glyph">✒️</span>
+            </button>
+            <span class="dock-sep"></span>
+            <button type="button" class="figma-dock-item" (click)="addShape('rectangle')" title="Bentuk Kotak (R)">
+              <span class="dock-glyph">▢</span>
+            </button>
+            <button type="button" class="figma-dock-item" (click)="addShape('circle')" title="Bentuk Lingkaran (O)">
+              <span class="dock-glyph">◯</span>
+            </button>
+            <button type="button" class="figma-dock-item" (click)="addText()" title="Tambah Teks (T)">
+              <span class="dock-glyph">T</span>
+            </button>
+            <button type="button" class="figma-dock-item" (click)="addTicketNumber()" title="Tambah No Tiket (N)">
+              <span class="dock-glyph">🔢</span>
+            </button>
+            <button type="button" class="figma-dock-item" (click)="addQr()" title="Generate QR Code (Q)">
+              <span class="dock-glyph">▦</span>
+            </button>
+            <button type="button" class="figma-dock-item" (click)="topbarLogoInput.click()" title="Upload Gambar / Logo (I)">
+              <span class="dock-glyph">▣</span>
+            </button>
+            <input #topbarLogoInput hidden type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" (change)="uploadLogo($event)">
+          </div>
+
           <div class="figma-save-pill" [class.saving]="saving()">
             <span class="save-dot"></span>
-            <span>{{ saving() ? 'Menyimpan perubahan…' : 'Tersimpan otomatis' }}</span>
+            <span>{{ saving() ? 'Menyimpan…' : 'Tersimpan otomatis' }}</span>
           </div>
         </div>
 
@@ -546,39 +780,70 @@ export class DesignsListComponent {
 
             <div class="panel-content">
               @if (leftTab === 'tools') {
+                <!-- Undo & Redo History Quick Access -->
                 <div class="tool-section">
-                  <div class="section-title">TAMBAH ELEMEN</div>
-                  <button type="button" class="tool-btn" (click)="addText()">
-                    <span class="tool-icon">T</span>
-                    <span class="tool-label">Tambah Teks</span>
-                    <span class="tool-plus">＋</span>
-                  </button>
-                  <button type="button" class="tool-btn" (click)="addTicketNumber()">
-                    <span class="tool-icon">🔢</span>
-                    <span class="tool-label">Tambah No Tiket</span>
-                    <span class="tool-plus">＋</span>
-                  </button>
-                  <button type="button" class="tool-btn" (click)="addShape('rectangle')">
-                    <span class="tool-icon">▢</span>
-                    <span class="tool-label">Bentuk Kotak</span>
-                    <span class="tool-plus">＋</span>
-                  </button>
-                  <button type="button" class="tool-btn" (click)="addShape('circle')">
-                    <span class="tool-icon">◯</span>
-                    <span class="tool-label">Bentuk Lingkaran</span>
-                    <span class="tool-plus">＋</span>
-                  </button>
-                  <button type="button" class="tool-btn" (click)="addQr()">
-                    <span class="tool-icon">▦</span>
-                    <span class="tool-label">Generate QR Code</span>
-                    <span class="tool-plus">＋</span>
-                  </button>
-                  <button type="button" class="tool-btn" (click)="logoInput.click()">
+                  <div class="section-title">RIWAYAT PERUBAHAN</div>
+                  <div class="tool-grid-2">
+                    <button type="button" class="tool-grid-btn" [disabled]="!canUndo()" (click)="undo()" title="Undo / Urungkan (Ctrl+Z)">
+                      <span>↶ Urungkan (Undo)</span>
+                      <span class="tool-badge-pill">Ctrl+Z</span>
+                    </button>
+                    <button type="button" class="tool-grid-btn" [disabled]="!canRedo()" (click)="redo()" title="Redo / Majukan (Ctrl+Y)">
+                      <span>↷ Majukan (Redo)</span>
+                      <span class="tool-badge-pill">Ctrl+Y</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Pen Tool & Tracing Category -->
+                <div class="tool-section">
+                  <div class="section-title">PENTOOL & TRACING KONTUR</div>
+                  <div class="pen-tool-card" [class.active]="activeTool() === 'pen'">
+                    <div class="pen-card-title">
+                      <span class="pen-card-label">✒️ Pen Tool Tracing</span>
+                      <span class="tool-badge-pill">P</span>
+                    </div>
+                    <p class="pen-card-desc">Tracing kontur objek bebas, buat clipping mask presisi atau buat objek vektor.</p>
+                    <button type="button" class="tool-grid-btn full-width" [class.active]="activeTool() === 'pen'" (click)="setTool(activeTool() === 'pen' ? 'select' : 'pen')">
+                      <span>{{ activeTool() === 'pen' ? '✓ Sedang Aktif (Klik Kanvas)' : '✒️ Aktifkan Pen Tool' }}</span>
+                      <span class="tool-badge-pill">P</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Elemen & Bentuk Category -->
+                <div class="tool-section">
+                  <div class="section-title">BENTUK & ELEMEN VEKTOR</div>
+                  <div class="tool-grid-2">
+                    <button type="button" class="tool-grid-btn" (click)="addShape('rectangle')" title="Bentuk Kotak (R)">
+                      <span>▢ Kotak</span>
+                      <span class="tool-badge-pill">R</span>
+                    </button>
+                    <button type="button" class="tool-grid-btn" (click)="addShape('circle')" title="Bentuk Lingkaran (O)">
+                      <span>◯ Lingkaran</span>
+                      <span class="tool-badge-pill">O</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Teks & No Tiket Category -->
+                <div class="tool-section">
+                  <div class="section-title">TEKS & PENOMORAN TIKET</div>
+                  <div class="tool-grid-2">
+                    <button type="button" class="tool-grid-btn" (click)="addText()" title="Tambah Teks (T)">
+                      <span>T Teks Baru</span>
+                      <span class="tool-badge-pill">T</span>
+                    </button>
+                    <button type="button" class="tool-grid-btn" (click)="addTicketNumber()" title="Tambah Nomor Tiket (N)">
+                      <span>🔢 No Tiket</span>
+                      <span class="tool-badge-pill">N</span>
+                    </button>
+                  </div>
+                  <button type="button" class="tool-btn mt-2" (click)="topbarLogoInput.click()" title="Upload Gambar atau Logo (I)">
                     <span class="tool-icon">▣</span>
                     <span class="tool-label">Upload Gambar / Logo</span>
-                    <span class="tool-plus">＋</span>
+                    <span class="tool-badge-pill">I</span>
                   </button>
-                  <input #logoInput hidden type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" (change)="uploadLogo($event)">
                   <button type="button" class="tool-btn danger-tool mt-2" (click)="clearAllElements()" title="Bersihkan semua elemen di kanvas">
                     <span class="tool-icon danger">🗑</span>
                     <span class="tool-label">Hapus Semua Objek</span>
@@ -639,31 +904,86 @@ export class DesignsListComponent {
 
               @if (leftTab === 'ai') {
                 <div class="ai-assistant-panel">
-                  <div class="section-title">ASISTEN GAYA & TEMA AI</div>
-                  <label class="field-label">Deskripsikan Suasana Acara</label>
-                  <textarea class="figma-textarea" rows="3" [(ngModel)]="aiBrief" placeholder="Contoh: Konser musik rock indie dengan warna gelap dan aksen neon hijau..."></textarea>
-                  <button type="button" class="figma-btn ai-btn full-width" (click)="recommendStyle()">
-                    <span>✦ Rekomendasikan Gaya</span>
-                  </button>
+                  <div class="section-title">REKOMENDASI GAYA & TEMA AI</div>
 
-                  @if (aiStyle()) {
-                    <div class="ai-style-card">
-                      <div class="ai-style-header">
-                        <strong>{{ aiStyle()!.name }}</strong>
-                        <span class="style-dot" [style.background]="aiStyle()!.accent"></span>
-                      </div>
-                      <p>{{ aiStyle()!.description }}</p>
-                      <div class="ai-palette-preview">
-                        <span class="swatch" [style.background]="aiStyle()!.background" title="Latar"></span>
-                        <span class="swatch" [style.background]="aiStyle()!.accent" title="Aksen"></span>
-                        <span class="swatch" [style.background]="aiStyle()!.ink" title="Teks"></span>
-                        <span class="font-chip">{{ aiStyle()!.font }}</span>
-                      </div>
-                      <button type="button" class="figma-btn-primary full-width" (click)="applyStyle()">
-                        <span>Terapkan ke Seluruh Kanvas</span>
+                  <label class="field-label">Pilih Kategori Cepat:</label>
+                  <div class="ai-category-chips">
+                    @for (rec of aiRecommendations; track rec.id) {
+                      <button
+                        type="button"
+                        class="ai-cat-chip"
+                        [class.active]="aiSelectedTheme()?.id === rec.id"
+                        (click)="selectAiTheme(rec)"
+                      >
+                        <span>{{ rec.icon }} {{ rec.category }}</span>
                       </button>
+                    }
+                  </div>
+
+                  <label class="field-label mt-2">Atau Ketik Konsep Acara Anda:</label>
+                  <textarea
+                    class="figma-textarea"
+                    rows="2"
+                    [(ngModel)]="aiBrief"
+                    placeholder="Contoh: Konser musik rock indie, tema malam gelap dengan aksen neon hijau..."
+                  ></textarea>
+
+                  <div class="ai-action-buttons-row">
+                    <button type="button" class="figma-btn ai-btn full-width" (click)="recommendStyle()" [disabled]="aiBusyState()">
+                      <span>✦ Analisis & Rekomendasikan AI</span>
+                    </button>
+                  </div>
+
+                  @if (aiSelectedTheme()) {
+                    <div class="ai-theme-preview-card">
+                      <div class="theme-card-header">
+                        <span class="theme-card-icon">{{ aiSelectedTheme()!.icon }}</span>
+                        <div class="theme-card-info">
+                          <strong>{{ aiSelectedTheme()!.name }}</strong>
+                          <span class="theme-card-cat">{{ aiSelectedTheme()!.category }} · {{ aiSelectedTheme()!.width }}×{{ aiSelectedTheme()!.height }} px</span>
+                        </div>
+                      </div>
+                      <p class="theme-card-desc">{{ aiSelectedTheme()!.description }}</p>
+
+                      <div class="theme-specs-row">
+                        <div class="theme-palette">
+                          <span class="swatch" [style.background]="aiSelectedTheme()!.background" title="Latar"></span>
+                          <span class="swatch" [style.background]="aiSelectedTheme()!.accent" title="Aksen Utama"></span>
+                          <span class="swatch" [style.background]="aiSelectedTheme()!.ink" title="Teks"></span>
+                        </div>
+                        <span class="theme-font-tag">{{ aiSelectedTheme()!.font }}</span>
+                        <span class="theme-badge-tag">{{ aiSelectedTheme()!.ticketStyle }}</span>
+                      </div>
+
+                      <div class="theme-apply-actions">
+                        <button type="button" class="figma-btn-primary full-width" (click)="applyAiTheme(aiSelectedTheme()!)">
+                          <span>🎨 Terapkan Gaya & Warna AI</span>
+                        </button>
+                        <button type="button" class="figma-btn full-width mt-1 ai-generate-full-btn" (click)="applyFullAiLayout(aiSelectedTheme()!)">
+                          <span>⚡ Buat Tata Letak Tiket Lengkap</span>
+                        </button>
+                      </div>
                     </div>
                   }
+
+                  <!-- All Recommended Presets Catalog -->
+                  <div class="section-title mt-3">KATALOG TEMA REKOMENDASI AI</div>
+                  <div class="ai-presets-catalog">
+                    @for (rec of aiRecommendations; track rec.id) {
+                      <div class="preset-catalog-item" [class.selected]="aiSelectedTheme()?.id === rec.id" (click)="selectAiTheme(rec)">
+                        <div class="catalog-item-top">
+                          <span>{{ rec.icon }} <b>{{ rec.name }}</b></span>
+                          <small>{{ rec.width }}×{{ rec.height }}</small>
+                        </div>
+                        <div class="catalog-item-palette">
+                          <span class="mini-dot" [style.background]="rec.background"></span>
+                          <span class="mini-dot" [style.background]="rec.accent"></span>
+                          <span class="mini-dot" [style.background]="rec.ink"></span>
+                          <small class="mini-font-name">{{ rec.font }}</small>
+                        </div>
+                      </div>
+                    }
+                  </div>
                 </div>
               }
             </div>
@@ -677,9 +997,50 @@ export class DesignsListComponent {
               <span>Skala Otomatis Presisi</span>
             </div>
 
+            <!-- Canvas sheet list removed as requested -->
+
+            @if (activeTool() === 'pen') {
+              <div class="figma-pen-dock">
+                <div class="pen-dock-status">
+                  <span class="pen-dock-icon">✒️</span>
+                  <span class="pen-dock-badge">Pen Tool: Tracing</span>
+                  <span class="pen-dock-points-count">{{ penPoints().length }} titik</span>
+                </div>
+                <div class="pen-dock-hint">
+                  @if (penPoints().length === 0) {
+                    Klik pada kanvas atau gambar untuk mulai meletakkan titik tracing
+                  } @else if (penPoints().length < 3) {
+                    Tandai minimal 3 titik untuk membuat mask / bentuk
+                  } @else {
+                    Klik titik awal untuk menutup, atau pilih aksi di samping:
+                  }
+                </div>
+                <div class="pen-dock-actions">
+                  @if (penPoints().length >= 3) {
+                    <button type="button" class="pen-action-btn primary" (click)="applyPenClippingMask()" title="Terapkan hasil tracing sebagai kliping mask">
+                      <span>✂️ Jadikan Mask</span>
+                    </button>
+                    <button type="button" class="pen-action-btn accent" (click)="createPenVectorShape()" title="Buat objek bentuk vektor baru dari tracing">
+                      <span>✦ Buat Vektor</span>
+                    </button>
+                  }
+                  @if (penPoints().length > 0) {
+                    <button type="button" class="pen-action-btn subtle" (click)="undoPenPoint()" title="Undo titik (Backspace)">
+                      <span>↺ Undo</span>
+                    </button>
+                  }
+                  <button type="button" class="pen-action-btn cancel" (click)="exitPenTool()" title="Selesai (Esc / V)">
+                    <span>✕ Selesai</span>
+                  </button>
+                </div>
+              </div>
+            }
+
             <div class="ticket-canvas-wrapper">
               <div
+                #canvasEl
                 class="ticket-canvas"
+                [class.pen-mode-active]="activeTool() === 'pen'"
                 [style.width.px]="canvasWidth()"
                 [style.aspect-ratio]="design()!.width + '/' + design()!.height"
                 [style.background]="backgroundImage() ? 'transparent' : background()"
@@ -688,6 +1049,7 @@ export class DesignsListComponent {
                 [style.background-position]="backgroundImage() ? 'center' : null"
                 [style.clip-path]="clipPath(backgroundMask())"
                 (pointerdown)="onCanvasStageClick($event)"
+                (pointermove)="onCanvasStageMove($event)"
               >
                 @for (el of design()!.config.elements; track el.id) {
                   @if (el.type === 'background') {
@@ -715,13 +1077,13 @@ export class DesignsListComponent {
                     >
                       <span
                         class="text-content-inner"
-                        [class.ticket-badge-span]="el['isTicketNo'] && el['ticketStyle'] && el['ticketStyle'] !== 'plain'"
+                        [class.ticket-badge-span]="(el['isTicketNo'] || isPrimaryTicketNoEl(el)) && el['ticketStyle'] && el['ticketStyle'] !== 'plain'"
                         [ngStyle]="ticketBadgeStyle(el)"
                         contenteditable="true"
                         (blur)="textInlineChange($event, el)"
                         (input)="textInlineInput($event, el)"
                         (pointerdown)="$event.stopPropagation()"
-                      >{{ el['text'] }}</span>
+                      >{{ isPrimaryTicketNoEl(el) ? getTicketNoForSheet(activeSheetIndex()) : el['text'] }}</span>
 
                       @if (selectedId() === el.id) {
                         <div class="canva-floating-bar" (pointerdown)="$event.stopPropagation()">
@@ -878,6 +1240,53 @@ export class DesignsListComponent {
                       }
                     </div>
                   }
+                }
+
+                <!-- Pen Tool Tracing & Clipping SVG Overlay -->
+                @if (activeTool() === 'pen') {
+                  <svg
+                    class="pen-tracing-svg"
+                    [attr.viewBox]="'0 0 ' + design()!.width + ' ' + design()!.height"
+                    (pointerdown)="onPenSvgClick($event)"
+                  >
+                    @if (penPoints().length >= 3) {
+                      <polygon [attr.points]="penSvgPoints()" class="pen-traced-polygon-preview" />
+                    }
+                    @if (penPoints().length >= 2) {
+                      <polyline [attr.points]="penSvgPoints()" class="pen-traced-polyline" />
+                    }
+                    @if (penPoints().length >= 1 && penHoverPoint()) {
+                      <line
+                        [attr.x1]="penPoints()[penPoints().length - 1].x"
+                        [attr.y1]="penPoints()[penPoints().length - 1].y"
+                        [attr.x2]="penHoverPoint()!.x"
+                        [attr.y2]="penHoverPoint()!.y"
+                        class="pen-rubberband-line"
+                      />
+                    }
+                    @for (p of penPoints(); track $index) {
+                      <g class="pen-anchor-node" [class.first-node]="$index === 0">
+                        @if ($index === 0) {
+                          <circle
+                            [attr.cx]="p.x"
+                            [attr.cy]="p.y"
+                            r="12"
+                            class="pen-start-halo"
+                            (pointerdown)="onPenStartNodeClick($event)"
+                            title="Klik untuk menutup kontur tracing"
+                          />
+                        }
+                        <circle
+                          [attr.cx]="p.x"
+                          [attr.cy]="p.y"
+                          r="6"
+                          class="pen-anchor-dot"
+                          (pointerdown)="onPenAnchorClick($index, $event)"
+                        />
+                        <text [attr.x]="p.x + 8" [attr.y]="p.y - 8" class="pen-point-index">P{{ $index + 1 }}</text>
+                      </g>
+                    }
+                  </svg>
                 }
               </div>
             </div>
@@ -1133,9 +1542,21 @@ export class DesignsListComponent {
                   <label class="field-label mt-2">Nama File</label>
                   <input class="figma-input readonly" readonly [value]="selectedElement()!['fileName'] || 'Gambar'">
 
-                  <label class="field-label mt-2">Bentuk Mask (Kliping)</label>
+                  <label class="field-label mt-2">Bentuk Mask (Kliping & Tracing)</label>
+                  <button type="button" class="figma-btn-primary full-width mb-2" (click)="startTracingSelectedElement(selectedElement()!)" title="Gunakan Pen Tool untuk tracing kontur dan memotong gambar ini">
+                    <span>✒️ Tracing Objek dengan Pen Tool</span>
+                  </button>
+                  @if (isCustomPolygon(selectedElement()!['clip'])) {
+                    <div class="custom-mask-status-badge">
+                      <span>✂️ Mask Tracing Kustom Aktif</span>
+                      <button type="button" class="mask-reset-mini-btn" (click)="removeElementMask(selectedElement()!)" title="Lepas Mask">Lepas</button>
+                    </div>
+                  }
                   <select class="figma-select" [value]="selectedElement()!['clip'] || 'none'" (change)="elementMaskChange($event, selectedElement()!)">
                     <option value="none">Tanpa Kliping</option>
+                    @if (isCustomPolygon(selectedElement()!['clip'])) {
+                      <option [value]="selectedElement()!['clip']">Poligon Kustom (Hasil Tracing Pen)</option>
+                    }
                     <option value="circle">Lingkaran</option>
                     <option value="ellipse">Elips</option>
                     <option value="diamond">Belah Ketupat</option>
@@ -1154,9 +1575,21 @@ export class DesignsListComponent {
                     <span class="hex-text">{{ selectedElement()!['fill'] || '#0d99ff' }}</span>
                   </div>
 
-                  <label class="field-label mt-2">Bentuk Kliping</label>
+                  <label class="field-label mt-2">Bentuk Kliping & Tracing</label>
+                  <button type="button" class="figma-btn-primary full-width mb-2" (click)="startTracingSelectedElement(selectedElement()!)" title="Gunakan Pen Tool untuk tracing kontur dan memotong bentuk ini">
+                    <span>✒️ Tracing Objek dengan Pen Tool</span>
+                  </button>
+                  @if (isCustomPolygon(selectedElement()!['clip'])) {
+                    <div class="custom-mask-status-badge">
+                      <span>✂️ Mask Tracing Kustom Aktif</span>
+                      <button type="button" class="mask-reset-mini-btn" (click)="removeElementMask(selectedElement()!)" title="Lepas Mask">Lepas</button>
+                    </div>
+                  }
                   <select class="figma-select" [value]="selectedElement()!['clip'] || 'none'" (change)="elementMaskChange($event, selectedElement()!)">
                     <option value="none">Bawaan</option>
+                    @if (isCustomPolygon(selectedElement()!['clip'])) {
+                      <option [value]="selectedElement()!['clip']">Poligon Kustom (Hasil Tracing Pen)</option>
+                    }
                     <option value="circle">Lingkaran</option>
                     <option value="ellipse">Elips</option>
                     <option value="diamond">Belah Ketupat</option>
@@ -1174,20 +1607,55 @@ export class DesignsListComponent {
               </div>
 
               <div class="inspector-section">
-                <div class="section-title">DIMENSI KANVAS</div>
-                <div class="canvas-spec-card">
-                  <div class="spec-row">
-                    <span>Lebar</span>
-                    <strong>{{ design()!.width }} px</strong>
+                <div class="section-title">DIMENSI & UKURAN TIKET</div>
+                
+                <div class="canvas-dimension-inputs">
+                  <div class="dim-field">
+                    <label>Lebar (Width)</label>
+                    <div class="input-with-unit">
+                      <input
+                        type="number"
+                        min="200"
+                        max="4000"
+                        [value]="design()!.width"
+                        (change)="onCanvasDimensionChange('width', $event)"
+                      >
+                      <span>px</span>
+                    </div>
                   </div>
-                  <div class="spec-row">
-                    <span>Tinggi</span>
-                    <strong>{{ design()!.height }} px</strong>
+                  <div class="dim-field">
+                    <label>Tinggi (Height)</label>
+                    <div class="input-with-unit">
+                      <input
+                        type="number"
+                        min="150"
+                        max="4000"
+                        [value]="design()!.height"
+                        (change)="onCanvasDimensionChange('height', $event)"
+                      >
+                      <span>px</span>
+                    </div>
                   </div>
-                  <div class="spec-row">
-                    <span>Tipe</span>
-                    <strong>{{ design()!.type }}</strong>
-                  </div>
+                </div>
+
+                <label class="field-label mt-2">Pilihan Preset Ukuran Standar:</label>
+                <div class="dimension-preset-chips-grid">
+                  @for (p of canvasPresets; track p.id) {
+                    <button
+                      type="button"
+                      class="dim-chip-btn"
+                      [class.active]="design()!.width === p.width && design()!.height === p.height"
+                      (click)="setCanvasPreset(p.width, p.height, p.id)"
+                      title="{{ p.name }} - {{ p.width }} × {{ p.height }} px"
+                    >
+                      <span class="dim-chip-icon">{{ p.icon }}</span>
+                      <div class="dim-chip-text">
+                        <strong>{{ p.name }}</strong>
+                        <small>{{ p.width }} × {{ p.height }} px</small>
+                      </div>
+                      <span class="dim-chip-badge">{{ p.badge }}</span>
+                    </button>
+                  }
                 </div>
               </div>
 
@@ -1245,7 +1713,7 @@ export class DesignsListComponent {
                   <span class="count-unit">LEMBAR</span>
                 </div>
                 <div class="quick-count-chips">
-                  @for (c of [5, 10, 25, 50, 100]; track c) {
+                  @for (c of [10, 25, 50, 100, 200, 500]; track c) {
                     <button type="button" class="quick-chip" [class.active]="printCount() === c" (click)="printCount.set(c)">{{ c }} Lembar</button>
                   }
                 </div>
@@ -1281,11 +1749,232 @@ export class DesignsListComponent {
               </div>
 
               <div class="print-field-group">
+                <div class="field-header-row">
+                  <label class="modal-label">Tata Letak & Kapasitas per Lembar Kertas (A4)</label>
+                  <span class="paper-saving-badge">
+                    💡 Hemat Kertas: {{ totalSheetsCount() }} Lembar A4 untuk {{ printCount() }} Tiket (Hemat {{ Math.max(0, printCount() - totalSheetsCount()) }} Lembar!)
+                  </span>
+                </div>
+                
+                <div class="layout-options-grid enhanced">
+                  <button
+                    type="button"
+                    class="layout-chip"
+                    [class.active]="printLayout() === 'auto'"
+                    (click)="printLayout.set('auto')"
+                  >
+                    <span class="layout-chip-icon">⚡</span>
+                    <span class="layout-chip-title">Otomatis Optimal</span>
+                    <small>{{ getEffectiveLayout().perSheet }} Tiket / Lembar (Auto-Fit)</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="layout-chip"
+                    [class.active]="printLayout() === '4-per-page'"
+                    (click)="printLayout.set('4-per-page')"
+                  >
+                    <span class="layout-chip-icon">▦</span>
+                    <span class="layout-chip-title">4 Tiket / Lembar</span>
+                    <small>Grid 2 × 2 Berurutan</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="layout-chip"
+                    [class.active]="printLayout() === '6-per-page'"
+                    (click)="printLayout.set('6-per-page')"
+                  >
+                    <span class="layout-chip-icon">▤</span>
+                    <span class="layout-chip-title">6 Tiket / Lembar</span>
+                    <small>Grid 2 × 3 Berurutan</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="layout-chip"
+                    [class.active]="printLayout() === '8-per-page'"
+                    (click)="printLayout.set('8-per-page')"
+                  >
+                    <span class="layout-chip-icon">▩</span>
+                    <span class="layout-chip-title">8 Tiket / Lembar</span>
+                    <small>Grid 2 × 4 Berurutan</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="layout-chip"
+                    [class.active]="printLayout() === '2-per-page'"
+                    (click)="printLayout.set('2-per-page')"
+                  >
+                    <span class="layout-chip-icon">📑</span>
+                    <span class="layout-chip-title">2 Tiket / Lembar</span>
+                    <small>Susun 2 Berurutan</small>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="layout-chip"
+                    [class.active]="printLayout() === '1-per-page'"
+                    (click)="printLayout.set('1-per-page')"
+                  >
+                    <span class="layout-chip-icon">📄</span>
+                    <span class="layout-chip-title">1 Tiket / Lembar</span>
+                    <small>Halaman Penuh (Full Size)</small>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Panduan Pemotongan Tiket (Cutting Guides & Crop Marks) -->
+              <div class="print-field-group cutting-options-group">
+                <label class="modal-label">Panduan Pemotongan Tiket (Cutting Guides)</label>
+                <div class="cutting-toggles-grid">
+                  <label class="figma-toggle-row">
+                    <input type="checkbox" [checked]="printShowCutLines()" (change)="printShowCutLines.set($any($event.target).checked)">
+                    <span>✂️ Garis Putus-Putus Potong (Dashed Cut Lines)</span>
+                  </label>
+                  <label class="figma-toggle-row">
+                    <input type="checkbox" [checked]="printShowCropMarks()" (change)="printShowCropMarks.set($any($event.target).checked)">
+                    <span>📐 Tanda Sudut Potong (Corner Crop Marks)</span>
+                  </label>
+                </div>
+                <small class="field-hint">
+                  Garis potong memudahkan pemotongan dengan gunting atau pisau cutter secara lurus dan presisi tanpa merusak desain tiket.
+                </small>
+              </div>
+
+              <div class="print-field-group">
                 <label class="modal-label">Sinkronisasi QR Code Otomatis</label>
                 <label class="figma-toggle-row">
                   <input type="checkbox" [checked]="printSyncQr()" (change)="printSyncQr.set($any($event.target).checked)">
                   <span>Otomatis sesuaikan QR Code dengan nomor tiket di setiap lembar</span>
                 </label>
+              </div>
+
+              <!-- Live Sheet Preview Card in Modal (Showing A4 Sheet with Multi-Tickets & Cutting Guides) -->
+              <div class="print-preview-sheet-card">
+                <div class="sheet-preview-header">
+                  <div class="sheet-step-indicator">
+                    <span>Pratinjau Lembar Kertas A4: <b>#{{ previewSheetIndex() + 1 }}</b> dari <b>{{ totalSheetsCount() }} Lembar</b></span>
+                    <span class="preview-ticket-badge">{{ getSheetTicketRange(previewSheetIndex()) }}</span>
+                  </div>
+                  <div class="sheet-nav-btns">
+                    <button type="button" class="sheet-nav-btn" [disabled]="previewSheetIndex() <= 0" (click)="previewSheetIndex.set(previewSheetIndex() - 1)">◀ Lembar Sebelumnya</button>
+                    <button type="button" class="sheet-nav-btn" [disabled]="previewSheetIndex() >= totalSheetsCount() - 1" (click)="previewSheetIndex.set(previewSheetIndex() + 1)">Lembar Berikutnya ▶</button>
+                  </div>
+                </div>
+
+                <div class="modal-ticket-preview-viewport multi-sheet-viewport">
+                  <div class="a4-sheet-preview-board" [attr.data-orientation]="getEffectiveLayout().orientation">
+                    <div class="a4-sheet-header-strip">
+                      <span>A4 {{ getEffectiveLayout().orientation | uppercase }} • {{ getEffectiveLayout().perSheet }} TIKET / LEMBAR</span>
+                      <span>✂ PANDUAN POTONG AKTIF</span>
+                    </div>
+
+                    <div
+                      class="a4-sheet-tickets-grid"
+                      [style.grid-template-columns]="'repeat(' + getEffectiveLayout().cols + ', 1fr)'"
+                      [style.grid-template-rows]="'repeat(' + getEffectiveLayout().rows + ', 1fr)'"
+                    >
+                      @for (ticket of getTicketsForSheet(previewSheetIndex()); track ticket.ticketNo; let idx = $index) {
+                        <div class="a4-preview-ticket-cell">
+                          <div
+                            class="ticket-canvas modal-mini-canvas"
+                            [style.aspect-ratio]="design()!.width + '/' + design()!.height"
+                            [style.background]="backgroundImage() ? 'transparent' : background()"
+                            [style.background-image]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null"
+                            [style.background-size]="backgroundImage() ? 'cover' : null"
+                            [style.background-position]="backgroundImage() ? 'center' : null"
+                            [style.clip-path]="clipPath(backgroundMask())"
+                          >
+                            @if (!hasTicketNoInElements()) {
+                              <div
+                                class="canvas-element canvas-text auto-printed-ticket-badge"
+                                [style.right.%]="6"
+                                [style.top.%]="6"
+                                [style.font-size.px]="18 * modalMultiPreviewScale()"
+                                style="position: absolute; font-family: 'Space Mono', monospace; font-weight: 700; z-index: 99;"
+                              >
+                                <span
+                                  class="text-content-inner ticket-badge-span"
+                                  [ngStyle]="autoTicketBadgeStyle()"
+                                >{{ ticket.ticketNo }}</span>
+                              </div>
+                            }
+
+                            @for (el of design()!.config.elements; track el.id) {
+                              @if (el.type === 'text') {
+                                <div
+                                  class="canvas-element canvas-text"
+                                  [style.left.%]="(el.x / design()!.width) * 100"
+                                  [style.top.%]="(el.y / design()!.height) * 100"
+                                  [style.font-size.px]="number(el['fontSize'], 24) * modalMultiPreviewScale()"
+                                  [style.font-weight]="el['fontWeight'] || 600"
+                                  [style.color]="el['color'] || '#1e293b'"
+                                  [style.font-family]="el['fontFamily'] || 'DM Sans'"
+                                  [style.width.%]="(number(el['width'], design()!.width * 0.6) / design()!.width) * 100"
+                                  [style.transform]="transform(el)"
+                                >
+                                  <span
+                                    class="text-content-inner"
+                                    [class.ticket-badge-span]="(el['isTicketNo'] || isPrimaryTicketNoEl(el)) && el['ticketStyle'] && el['ticketStyle'] !== 'plain'"
+                                    [ngStyle]="ticketBadgeStyle(el)"
+                                  >{{ isPrimaryTicketNoEl(el) ? ticket.ticketNo : el['text'] }}</span>
+                                </div>
+                              } @else if (el.type === 'qr') {
+                                <div
+                                  class="canvas-element canvas-qr"
+                                  [style.left.%]="(el.x / design()!.width) * 100"
+                                  [style.top.%]="(el.y / design()!.height) * 100"
+                                  [style.width.%]="(number(el['width'], 120) / design()!.width) * 100"
+                                  [style.height.%]="(number(el['height'], 120) / design()!.height) * 100"
+                                  [style.transform]="transform(el)"
+                                >
+                                  <img [src]="el['qrDataUrl']" alt="QR Code">
+                                </div>
+                              } @else if (el.type === 'image') {
+                                <div
+                                  class="canvas-element canvas-image"
+                                  [style.left.%]="(el.x / design()!.width) * 100"
+                                  [style.top.%]="(el.y / design()!.height) * 100"
+                                  [style.width.%]="(number(el['width'], 140) / design()!.width) * 100"
+                                  [style.height.%]="(number(el['height'], 90) / design()!.height) * 100"
+                                  [style.transform]="transform(el)"
+                                  [style.clip-path]="clipPath(el['clip'] || 'none')"
+                                >
+                                  <img [src]="el['src']" alt="Logo / Gambar">
+                                </div>
+                              } @else if (el.type === 'rectangle' || el.type === 'circle') {
+                                <div
+                                  class="canvas-element canvas-shape"
+                                  [class.circle-shape]="el.type === 'circle'"
+                                  [style.left.%]="(el.x / design()!.width) * 100"
+                                  [style.top.%]="(el.y / design()!.height) * 100"
+                                  [style.width.%]="(number(el['width'], 120) / design()!.width) * 100"
+                                  [style.height.%]="(number(el['height'], 70) / design()!.height) * 100"
+                                  [style.transform]="transform(el)"
+                                  [style.background]="el['fill'] || '#0d99ff'"
+                                  [style.clip-path]="clipPath(el['clip'] || 'none')"
+                                ></div>
+                              }
+                            }
+                          </div>
+
+                          @if (printShowCutLines() && (idx + 1) % getEffectiveLayout().cols !== 0) {
+                            <div class="modal-preview-vertical-cut">
+                              <span>✂</span>
+                            </div>
+                          }
+                          @if (printShowCutLines() && idx < getTicketsForSheet(previewSheetIndex()).length - getEffectiveLayout().cols) {
+                            <div class="modal-preview-horizontal-cut">
+                              <span>✂</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="print-preview-summary">
@@ -1305,94 +1994,286 @@ export class DesignsListComponent {
             </div>
 
             <div class="modal-actions">
-              <button class="outline-btn" type="button" (click)="closePrintModal()" [disabled]="printBusy()">Batal</button>
-              <button class="primary-btn print-submit-btn" type="button" (click)="executeBatchPrint()" [disabled]="printBusy() || printCount() < 1">
-                <span>{{ printBusy() ? 'Menyiapkan ' + printCount() + ' Lembar…' : '🖨 Generate & Cetak ' + printCount() + ' Lembar PDF' }}</span>
-                <span class="btn-arrow">↗</span>
+              <button class="outline-btn" type="button" (click)="closePrintModal()" [disabled]="printBusy() || pdfGenerating()">Batal</button>
+              <button class="figma-btn btn-preview-pdf" type="button" (click)="openFullPdfPreview()" [disabled]="printBusy() || pdfGenerating() || printCount() < 1" title="Buka Pratinjau Dokumen PDF Lengkap">
+                <span>{{ pdfGenerating() ? 'Menyiapkan (' + pdfProgress() + '%)…' : '👁 Pratinjau PDF' }}</span>
               </button>
+              <button class="figma-btn-primary" type="button" (click)="saveDirectPdf()" [disabled]="printBusy() || pdfGenerating() || printCount() < 1" title="Unduh dan Simpan Langsung File PDF ke Komputer">
+                <span>{{ pdfGenerating() ? 'Menyimpan (' + pdfProgress() + '%)…' : '💾 Simpan File PDF' }}</span>
+              </button>
+             
             </div>
           </section>
         </div>
       }
 
       <!-- Batch Print Rendering Container for Browser Print / PDF Export -->
+      <!-- Dedicated PDF Document Viewer & Direct Save Modal -->
+      @if (pdfViewerModalOpen()) {
+        <div class="modal-scrim pdf-preview-scrim" (click)="closePdfViewerModal()">
+          <section class="pdf-viewer-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <!-- PDF Viewer Header Toolbar -->
+            <div class="pdf-viewer-header">
+              <div class="pdf-viewer-title-group">
+                <span class="pdf-file-icon">📄</span>
+                <div>
+                  <strong>{{ design()!.name || 'Tiket-Event' }}.pdf</strong>
+                  <span class="pdf-meta-badge">{{ pdfPageItems().length }} Halaman • {{ getTicketNoForSheet(0) }} s/d {{ getTicketNoForSheet(pdfPageItems().length - 1) }}</span>
+                </div>
+              </div>
+
+              <div class="pdf-viewer-controls">
+                <!-- Mode View Switcher: Document vs Batch Grid -->
+                <div class="pdf-view-mode-toggle">
+                  <button
+                    type="button"
+                    class="mode-toggle-btn"
+                    [class.active]="pdfViewMode() === 'grid'"
+                    (click)="pdfViewMode.set('grid')"
+                    title="Tampilkan Semua Lembar Batch dalam Grid"
+                  >
+                    <span>⊞ Grid Semua ({{ pdfPageItems().length }})</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="mode-toggle-btn"
+                    [class.active]="pdfViewMode() === 'document'"
+                    (click)="pdfViewMode.set('document')"
+                    title="Tampilkan Lembar Tunggal Resolusi Tinggi"
+                  >
+                    <span>📄 Lembar</span>
+                  </button>
+                </div>
+
+                @if (pdfViewMode() === 'document') {
+                  <button type="button" class="pdf-nav-btn" [disabled]="pdfCurrentPage() <= 0" (click)="pdfCurrentPage.set(pdfCurrentPage() - 1)">◀</button>
+                  <span class="pdf-page-indicator">Halaman {{ pdfCurrentPage() + 1 }} / {{ pdfPageItems().length }}</span>
+                  <button type="button" class="pdf-nav-btn" [disabled]="pdfCurrentPage() >= pdfPageItems().length - 1" (click)="pdfCurrentPage.set(pdfCurrentPage() + 1)">▶</button>
+
+                  <span class="pdf-divider"></span>
+
+                  <button type="button" class="pdf-zoom-btn" (click)="zoomOutPdf()">－</button>
+                  <span class="pdf-zoom-level">{{ Math.round(pdfZoom() * 100) }}%</span>
+                  <button type="button" class="pdf-zoom-btn" (click)="zoomInPdf()">＋</button>
+                  <button type="button" class="pdf-zoom-btn" (click)="resetZoomPdf()">Fit</button>
+                }
+              </div>
+
+              <div class="pdf-viewer-actions">
+                <button type="button" class="figma-btn-primary pdf-download-btn" (click)="downloadPdfFile()" [disabled]="pdfGenerating()">
+                  <span>💾 Simpan File PDF</span>
+                </button>
+                <button type="button" class="figma-btn export-btn" (click)="printFromPdfViewer()">
+                  <span>🖨 Cetak</span>
+                </button>
+                <button type="button" class="modal-close-btn" (click)="closePdfViewerModal()">✕</button>
+              </div>
+            </div>
+
+            <!-- PDF Viewer Body -->
+            <div class="pdf-viewer-body">
+              @if (pdfViewMode() === 'document') {
+                <!-- Left Thumbnail Strip -->
+                <aside class="pdf-thumbnail-sidebar">
+                  <div class="sidebar-title">DAFTAR LEMBAR ({{ pdfPageItems().length }})</div>
+                  <div class="pdf-thumbnail-list">
+                    @for (item of pdfPageItems(); track $index) {
+                      <div
+                        class="pdf-thumb-card"
+                        [class.active]="pdfCurrentPage() === $index"
+                        (click)="pdfCurrentPage.set($index)"
+                      >
+                        <div class="thumb-header">
+                          <span class="thumb-page-num">#{{ $index + 1 }}</span>
+                          <span class="thumb-ticket-no">{{ item.ticketNo }}</span>
+                        </div>
+                        <div class="thumb-img-wrapper">
+                          <img [src]="item.dataUrl" [alt]="'Lembar ' + ($index + 1)">
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </aside>
+
+                <!-- Main Single Page Stage -->
+                <main class="pdf-main-stage">
+                  <div class="pdf-page-display-wrapper" [style.transform]="'scale(' + pdfZoom() + ')'">
+                    @if (pdfPageItems().length > 0 && pdfPageItems()[pdfCurrentPage()]) {
+                      <div class="pdf-rendered-page-sheet">
+                        <img
+                          [src]="pdfPageItems()[pdfCurrentPage()].dataUrl"
+                          [alt]="'Halaman ' + (pdfCurrentPage() + 1)"
+                          class="pdf-page-rendered-img"
+                        >
+                        <div class="pdf-watermark-footer">
+                          <span>{{ design()!.name }}</span>
+                          <span>Lembar {{ pdfCurrentPage() + 1 }} dari {{ pdfPageItems().length }} ({{ pdfPageItems()[pdfCurrentPage()].ticketNo }})</span>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="pdf-loading-box">
+                        <div class="figma-spinner"></div>
+                        <p>Memuat Halaman PDF…</p>
+                      </div>
+                    }
+                  </div>
+                </main>
+              } @else {
+                <!-- All Batch Tickets Grid Stage -->
+                <main class="pdf-grid-stage">
+                  <div class="pdf-grid-overview-header">
+                    <div class="grid-overview-title">
+                      <strong>BATCH TIKET: {{ pdfPageItems().length }} LEMBAR SIAP CETAK</strong>
+                      <span class="grid-seq-badge">Nomor Urut: {{ getTicketNoForSheet(0) }} s/d {{ getTicketNoForSheet(pdfPageItems().length - 1) }}</span>
+                    </div>
+                    <div class="grid-overview-hint">
+                      💡 Klik salah satu tiket untuk beralih dan melihat perbesaran resolusi tinggi lembar tersebut.
+                    </div>
+                  </div>
+
+                  <div class="pdf-grid-container">
+                    @for (item of pdfPageItems(); track $index) {
+                      <div class="pdf-batch-card" (click)="selectTicketFromGrid($index)" title="Klik untuk melihat lembar #{{ $index + 1 }} ({{ item.ticketNo }})">
+                        <div class="batch-card-header">
+                          <span class="batch-card-index">Lembar #{{ $index + 1 }}</span>
+                          <span class="batch-card-ticket-no">{{ item.ticketNo }}</span>
+                        </div>
+                        <div class="batch-card-preview">
+                          <img [src]="item.dataUrl" [alt]="'Tiket #' + ($index + 1) + ' - ' + item.ticketNo">
+                        </div>
+                        <div class="batch-card-footer">
+                          <span class="batch-status-dot">●</span>
+                          <span>Siap Cetak PDF (300 DPI)</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </main>
+              }
+            </div>
+          </section>
+        </div>
+      }
+
       @if (printPages().length > 0) {
-        <div class="print-batch-root" id="print-batch-root">
-          @for (page of printPages(); track $index) {
-            <div class="print-sheet-wrapper">
-              <div
-                class="ticket-canvas print-canvas-instance"
-                [style.aspect-ratio]="design()!.width + '/' + design()!.height"
-                [style.background]="backgroundImage() ? 'transparent' : background()"
-                [style.background-image]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null"
-                [style.background-size]="backgroundImage() ? 'cover' : null"
-                [style.background-position]="backgroundImage() ? 'center' : null"
-                [style.clip-path]="clipPath(backgroundMask())"
-              >
-                @for (el of design()!.config.elements; track el.id) {
-                  @if (el.type === 'background') {
-                    <!-- background -->
-                  } @else if (el.type === 'text') {
+        <div class="print-batch-root" id="print-batch-root" [attr.data-layout]="printLayout()" [attr.data-orientation]="getEffectiveLayout().orientation">
+          @for (sheet of printSheets(); track $index) {
+            <div class="print-sheet-wrapper" [class]="'layout-' + printLayout()" [attr.data-orientation]="getEffectiveLayout().orientation">
+              <div class="print-sheet-header-meta">
+                <span>{{ design()!.name }}</span>
+                <span>Lembar {{ $index + 1 }} dari {{ printSheets().length }} ({{ sheet[0]?.ticketNo }} s/d {{ sheet[sheet.length - 1]?.ticketNo }})</span>
+                <span class="meta-cut-hint">✂ Garis Potong Aktif</span>
+              </div>
+              <div class="print-sheet-grid" [style.grid-template-columns]="'repeat(' + getEffectiveLayout().cols + ', 1fr)'">
+                @for (page of sheet; track page.ticketNo; let idx = $index) {
+                  <div class="print-ticket-cell">
                     <div
-                      class="canvas-element canvas-text"
-                      [style.left.%]="(el.x / design()!.width) * 100"
-                      [style.top.%]="(el.y / design()!.height) * 100"
-                      [style.font-size.px]="number(el['fontSize'], 24) * printScale()"
-                      [style.font-weight]="el['fontWeight'] || 600"
-                      [style.color]="el['color'] || '#1e293b'"
-                      [style.font-family]="el['fontFamily'] || 'DM Sans'"
-                      [style.text-transform]="el['textStyle'] === 'uppercase' ? 'uppercase' : null"
-                      [style.font-style]="el['textStyle'] === 'italic' ? 'italic' : null"
-                      [style.text-decoration]="el['textStyle'] === 'underline' ? 'underline' : null"
-                      [style.text-shadow]="el['textStyle'] === 'shadow' ? '2px 3px 6px rgba(0,0,0,0.35)' : null"
-                      [style.webkit-text-stroke]="el['textStyle'] === 'outline' ? '1px currentColor' : null"
-                      [style.letter-spacing.px]="number(el['letterSpacing'], 0) * printScale()"
-                      [style.text-align]="el['textAlign'] || 'left'"
-                      [style.width.%]="(number(el['width'], design()!.width * 0.6) / design()!.width) * 100"
-                      [style.transform]="transform(el)"
+                      class="ticket-canvas print-canvas-instance"
+                      [style.aspect-ratio]="design()!.width + '/' + design()!.height"
+                      [style.background]="backgroundImage() ? 'transparent' : background()"
+                      [style.background-image]="backgroundImage() ? 'url(' + backgroundImage() + ')' : null"
+                      [style.background-size]="backgroundImage() ? 'cover' : null"
+                      [style.background-position]="backgroundImage() ? 'center' : null"
+                      [style.clip-path]="clipPath(backgroundMask())"
                     >
-                      <span
-                        class="text-content-inner"
-                        [class.ticket-badge-span]="el['isTicketNo'] && el['ticketStyle'] && el['ticketStyle'] !== 'plain'"
-                        [ngStyle]="ticketBadgeStyle(el)"
-                      >{{ el['isTicketNo'] ? page.ticketNo : el['text'] }}</span>
+                      @if (!hasTicketNoInElements()) {
+                        <div
+                          class="canvas-element canvas-text auto-printed-ticket-badge"
+                          [style.right.%]="6"
+                          [style.top.%]="6"
+                          [style.font-size.px]="22 * printScale()"
+                          style="position: absolute; font-family: 'Space Mono', monospace; font-weight: 700; z-index: 99;"
+                        >
+                          <span
+                            class="text-content-inner ticket-badge-span"
+                            [ngStyle]="autoTicketBadgeStyle()"
+                          >{{ page.ticketNo }}</span>
+                        </div>
+                      }
+                      @for (el of design()!.config.elements; track el.id) {
+                        @if (el.type === 'background') {
+                          <!-- background -->
+                        } @else if (el.type === 'text') {
+                          <div
+                            class="canvas-element canvas-text"
+                            [style.left.%]="(el.x / design()!.width) * 100"
+                            [style.top.%]="(el.y / design()!.height) * 100"
+                            [style.font-size.px]="number(el['fontSize'], 24) * printScale()"
+                            [style.font-weight]="el['fontWeight'] || 600"
+                            [style.color]="el['color'] || '#1e293b'"
+                            [style.font-family]="el['fontFamily'] || 'DM Sans'"
+                            [style.text-transform]="el['textStyle'] === 'uppercase' ? 'uppercase' : null"
+                            [style.font-style]="el['textStyle'] === 'italic' ? 'italic' : null"
+                            [style.text-decoration]="el['textStyle'] === 'underline' ? 'underline' : null"
+                            [style.text-shadow]="el['textStyle'] === 'shadow' ? '2px 3px 6px rgba(0,0,0,0.35)' : null"
+                            [style.webkit-text-stroke]="el['textStyle'] === 'outline' ? '1px currentColor' : null"
+                            [style.letter-spacing.px]="number(el['letterSpacing'], 0) * printScale()"
+                            [style.text-align]="el['textAlign'] || 'left'"
+                            [style.width.%]="(number(el['width'], design()!.width * 0.6) / design()!.width) * 100"
+                            [style.transform]="transform(el)"
+                          >
+                            <span
+                              class="text-content-inner"
+                              [class.ticket-badge-span]="(el['isTicketNo'] || isPrimaryTicketNoEl(el)) && el['ticketStyle'] && el['ticketStyle'] !== 'plain'"
+                              [ngStyle]="ticketBadgeStyle(el)"
+                            >{{ isPrimaryTicketNoEl(el) ? page.ticketNo : el['text'] }}</span>
+                          </div>
+                        } @else if (el.type === 'qr') {
+                          <div
+                            class="canvas-element canvas-qr"
+                            [style.left.%]="(el.x / design()!.width) * 100"
+                            [style.top.%]="(el.y / design()!.height) * 100"
+                            [style.width.%]="(number(el['width'], 120) / design()!.width) * 100"
+                            [style.height.%]="(number(el['height'], 120) / design()!.height) * 100"
+                            [style.transform]="transform(el)"
+                          >
+                            <img [src]="(printSyncQr() && page.qrDataUrl) ? page.qrDataUrl : (el['qrDataUrl'] || page.qrDataUrl)" alt="QR Code">
+                          </div>
+                        } @else if (el.type === 'image') {
+                          <div
+                            class="canvas-element canvas-image"
+                            [style.left.%]="(el.x / design()!.width) * 100"
+                            [style.top.%]="(el.y / design()!.height) * 100"
+                            [style.width.%]="(number(el['width'], 140) / design()!.width) * 100"
+                            [style.height.%]="(number(el['height'], 90) / design()!.height) * 100"
+                            [style.transform]="transform(el)"
+                            [style.clip-path]="clipPath(el['clip'] || 'none')"
+                          >
+                            <img [src]="el['src']" alt="Logo / Gambar">
+                          </div>
+                        } @else if (el.type === 'rectangle' || el.type === 'circle') {
+                          <div
+                            class="canvas-element canvas-shape"
+                            [class.circle-shape]="el.type === 'circle'"
+                            [style.left.%]="(el.x / design()!.width) * 100"
+                            [style.top.%]="(el.y / design()!.height) * 100"
+                            [style.width.%]="(number(el['width'], 120) / design()!.width) * 100"
+                            [style.height.%]="(number(el['height'], 70) / design()!.height) * 100"
+                            [style.transform]="transform(el)"
+                            [style.background]="el['fill'] || '#0d99ff'"
+                            [style.clip-path]="clipPath(el['clip'] || 'none')"
+                          ></div>
+                        }
+                      }
                     </div>
-                  } @else if (el.type === 'qr') {
-                    <div
-                      class="canvas-element canvas-qr"
-                      [style.left.%]="(el.x / design()!.width) * 100"
-                      [style.top.%]="(el.y / design()!.height) * 100"
-                      [style.width.%]="(number(el['width'], 120) / design()!.width) * 100"
-                      [style.height.%]="(number(el['height'], 120) / design()!.height) * 100"
-                      [style.transform]="transform(el)"
-                    >
-                      <img [src]="page.qrDataUrl || el['qrDataUrl']" alt="QR Code">
-                    </div>
-                  } @else if (el.type === 'image') {
-                    <div
-                      class="canvas-element canvas-image"
-                      [style.left.%]="(el.x / design()!.width) * 100"
-                      [style.top.%]="(el.y / design()!.height) * 100"
-                      [style.width.%]="(number(el['width'], 140) / design()!.width) * 100"
-                      [style.height.%]="(number(el['height'], 90) / design()!.height) * 100"
-                      [style.transform]="transform(el)"
-                      [style.clip-path]="clipPath(el['clip'] || 'none')"
-                    >
-                      <img [src]="el['src']" alt="Logo / Gambar">
-                    </div>
-                  } @else if (el.type === 'rectangle' || el.type === 'circle') {
-                    <div
-                      class="canvas-element canvas-shape"
-                      [class.circle-shape]="el.type === 'circle'"
-                      [style.left.%]="(el.x / design()!.width) * 100"
-                      [style.top.%]="(el.y / design()!.height) * 100"
-                      [style.width.%]="(number(el['width'], 120) / design()!.width) * 100"
-                      [style.height.%]="(number(el['height'], 70) / design()!.height) * 100"
-                      [style.transform]="transform(el)"
-                      [style.background]="el['fill'] || '#0d99ff'"
-                      [style.clip-path]="clipPath(el['clip'] || 'none')"
-                    ></div>
-                  }
+
+                    @if (printShowCropMarks()) {
+                      <span class="crop-mark top-left"></span>
+                      <span class="crop-mark top-right"></span>
+                      <span class="crop-mark bottom-left"></span>
+                      <span class="crop-mark bottom-right"></span>
+                    }
+                    @if (printShowCutLines() && (idx + 1) % getEffectiveLayout().cols !== 0) {
+                      <div class="vertical-cut-guide">
+                        <span class="cut-scissor">✂</span>
+                      </div>
+                    }
+                    @if (printShowCutLines() && idx < sheet.length - getEffectiveLayout().cols) {
+                      <div class="horizontal-cut-guide">
+                        <span class="cut-scissor">✂</span>
+                      </div>
+                    }
+                  </div>
                 }
               </div>
             </div>
@@ -1403,6 +2284,22 @@ export class DesignsListComponent {
   `
 })
 export class TicketEditorComponent implements OnDestroy {
+  Math = Math;
+  @ViewChild('canvasEl') canvasEl?: ElementRef<HTMLElement>;
+  @ViewChild('topbarLogoInput') topbarLogoInput?: ElementRef<HTMLInputElement>;
+
+  activeTool = signal<'select' | 'pen'>('select');
+  penPoints = signal<Array<{ x: number; y: number }>>([]);
+  penHoverPoint = signal<{ x: number; y: number } | null>(null);
+
+  // Undo & Redo History System
+  private history: Array<DesignConfig> = [];
+  private historyIndex = signal<number>(-1);
+  private isUndoingOrRedoing = false;
+
+  canUndo = computed(() => this.historyIndex() > 0 || (this.activeTool() === 'pen' && this.penPoints().length > 0));
+  canRedo = computed(() => this.historyIndex() >= 0 && this.historyIndex() < this.history.length - 1);
+
   private api = inject(DesignsApi);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -1410,6 +2307,10 @@ export class TicketEditorComponent implements OnDestroy {
   fontOptions = fontOptions;
   ticketStyles = ticketStyles;
   ticketNoStyles = ticketNoStyles;
+  canvasPresets = canvasPresets;
+  aiRecommendations = aiRecommendations;
+  aiSelectedTheme = signal<AiThemeRecommendation | null>(aiRecommendations[0]);
+  pdfViewMode = signal<'document' | 'grid'>('grid');
 
   design = signal<Design | null>(null);
   loading = signal(true);
@@ -1433,8 +2334,116 @@ export class TicketEditorComponent implements OnDestroy {
   printPad = signal(4);
   printSuffix = signal('');
   printSyncQr = signal(true);
+  printShowCutLines = signal(true);
+  printShowCropMarks = signal(true);
   printBusy = signal(false);
   printPages = signal<Array<{ ticketNo: string; qrDataUrl?: string }>>([]);
+  activeSheetIndex = signal<number>(0);
+  previewSheetIndex = signal<number>(0);
+  printLayout = signal<string>('auto');
+  pdfViewerModalOpen = signal<boolean>(false);
+  pdfGenerating = signal<boolean>(false);
+  pdfProgress = signal<number>(0);
+  pdfCurrentPage = signal<number>(0);
+  pdfZoom = signal<number>(0.75);
+  pdfPageItems = signal<Array<{ ticketNo: string; dataUrl: string }>>([]);
+
+  getEffectiveLayout(): { cols: number; rows: number; perSheet: number; orientation: 'portrait' | 'landscape'; label: string } {
+    const layout = this.printLayout();
+    const d = this.design();
+    const tw = d?.width || 1050;
+    const th = d?.height || 600;
+    const ratio = tw / th;
+
+    if (layout === '1-per-page') {
+      return { cols: 1, rows: 1, perSheet: 1, orientation: ratio >= 1 ? 'landscape' : 'portrait', label: '1 Tiket / Lembar' };
+    }
+    if (layout === '2-per-page') {
+      return { cols: 1, rows: 2, perSheet: 2, orientation: 'portrait', label: '2 Tiket / Lembar A4' };
+    }
+    if (layout === '3-per-page') {
+      return { cols: 1, rows: 3, perSheet: 3, orientation: 'portrait', label: '3 Tiket / Lembar A4' };
+    }
+    if (layout === '4-per-page') {
+      return { cols: 2, rows: 2, perSheet: 4, orientation: ratio >= 1.5 ? 'landscape' : 'portrait', label: '4 Tiket / Lembar A4' };
+    }
+    if (layout === '6-per-page') {
+      return ratio >= 1.8
+        ? { cols: 2, rows: 3, perSheet: 6, orientation: 'portrait', label: '6 Tiket / Lembar A4' }
+        : { cols: 3, rows: 2, perSheet: 6, orientation: 'landscape', label: '6 Tiket / Lembar A4' };
+    }
+    if (layout === '8-per-page') {
+      return { cols: 2, rows: 4, perSheet: 8, orientation: 'portrait', label: '8 Tiket / Lembar A4' };
+    }
+    if (layout === '10-per-page') {
+      return { cols: 2, rows: 5, perSheet: 10, orientation: 'portrait', label: '10 Tiket / Lembar A4' };
+    }
+
+    // Default 'auto': calculate optimal fit for standard A4
+    if (ratio >= 2.3) {
+      return { cols: 2, rows: 4, perSheet: 8, orientation: 'portrait', label: 'Otomatis: 8 Tiket / Lembar A4' };
+    } else if (ratio >= 1.6) {
+      return { cols: 2, rows: 2, perSheet: 4, orientation: 'landscape', label: 'Otomatis: 4 Tiket / Lembar A4' };
+    } else if (ratio >= 1.1) {
+      return { cols: 2, rows: 2, perSheet: 4, orientation: 'portrait', label: 'Otomatis: 4 Tiket / Lembar A4' };
+    } else {
+      return { cols: 3, rows: 1, perSheet: 3, orientation: 'landscape', label: 'Otomatis: 3 Tiket / Lembar A4' };
+    }
+  }
+
+  totalSheetsCount = computed(() => {
+    const count = this.printCount();
+    const perSheet = this.getEffectiveLayout().perSheet;
+    return Math.max(1, Math.ceil(count / perSheet));
+  });
+
+  getTicketsForSheet(sheetIdx: number): Array<{ index: number; ticketNo: string }> {
+    const perSheet = this.getEffectiveLayout().perSheet;
+    const startIdx = sheetIdx * perSheet;
+    const count = this.printCount();
+    const endIdx = Math.min(count, startIdx + perSheet);
+    const prefix = this.printPrefix();
+    const startNo = Number(this.printStartNo()) || 1;
+    const pad = Number(this.printPad()) || 0;
+    const suffix = this.printSuffix();
+
+    const tickets: Array<{ index: number; ticketNo: string }> = [];
+    for (let i = startIdx; i < endIdx; i++) {
+      const ticketNo = this.formatTicketNumber(prefix, startNo + i, pad, suffix);
+      tickets.push({ index: i, ticketNo });
+    }
+    return tickets;
+  }
+
+  getSheetTicketRange(sheetIdx: number): string {
+    const tickets = this.getTicketsForSheet(sheetIdx);
+    if (tickets.length === 0) return '';
+    if (tickets.length === 1) return tickets[0].ticketNo;
+    return `${tickets[0].ticketNo} s/d ${tickets[tickets.length - 1].ticketNo} (${tickets.length} Tiket)`;
+  }
+
+  modalMultiPreviewScale(): number {
+    const perSheet = this.getEffectiveLayout().perSheet;
+    if (perSheet <= 2) return 0.32;
+    if (perSheet <= 4) return 0.22;
+    if (perSheet <= 6) return 0.17;
+    return 0.14;
+  }
+
+  sheetIndexes = computed(() => {
+    const count = Math.min(this.totalSheetsCount(), 30);
+    return Array.from({ length: count }, (_, i) => i);
+  });
+
+  printSheets = computed(() => {
+    const pages = this.printPages();
+    const perSheet = this.getEffectiveLayout().perSheet;
+    const sheets: Array<Array<{ ticketNo: string; qrDataUrl?: string }>> = [];
+    for (let i = 0; i < pages.length; i += perSheet) {
+      sheets.push(pages.slice(i, i + perSheet));
+    }
+    return sheets;
+  });
 
   private drag: {
     id: string;
@@ -1468,6 +2477,8 @@ export class TicketEditorComponent implements OnDestroy {
         this.background.set(d.config?.canvas?.background || '#f4f1e8');
         this.backgroundImage.set(String(d.config?.canvas?.backgroundImage || ''));
         this.backgroundMask.set(String(d.config?.canvas?.backgroundMask || 'none'));
+        this.history = [structuredClone(d.config)];
+        this.historyIndex.set(0);
         this.loading.set(false);
         for (const el of d.config?.elements || []) {
           if (el.type === 'qr') {
@@ -1591,6 +2602,9 @@ export class TicketEditorComponent implements OnDestroy {
 
   clipPath(shape: unknown) {
     const key = typeof shape === 'string' ? shape : 'none';
+    if (key.startsWith('polygon(') || key.startsWith('path(')) {
+      return key;
+    }
     const shapes: Record<string, string> = {
       none: 'none',
       circle: 'circle(50% at 50% 50%)',
@@ -1874,6 +2888,53 @@ export class TicketEditorComponent implements OnDestroy {
     );
     if (isTyping) return;
 
+    // Undo (Ctrl+Z / Cmd+Z)
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z') && !e.shiftKey) {
+      e.preventDefault();
+      this.undo();
+      return;
+    }
+
+    // Redo (Ctrl+Y / Cmd+Y or Ctrl+Shift+Z / Cmd+Shift+Z)
+    if (
+      ((e.ctrlKey || e.metaKey) && (e.key === 'y' || e.key === 'Y')) ||
+      ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z') && e.shiftKey)
+    ) {
+      e.preventDefault();
+      this.redo();
+      return;
+    }
+
+    if (this.activeTool() === 'pen') {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        this.exitPenTool();
+        return;
+      }
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        e.preventDefault();
+        this.undoPenPoint();
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        this.applyPenClippingMask();
+        return;
+      }
+    }
+
+    if (e.key === 'p' || e.key === 'P') {
+      e.preventDefault();
+      this.setTool(this.activeTool() === 'pen' ? 'select' : 'pen');
+      return;
+    }
+    if (e.key === 'v' || e.key === 'V') {
+      e.preventDefault();
+      this.setTool('select');
+      return;
+    }
+
+
     if (e.key === 'Delete' || e.key === 'Backspace') {
       const sel = this.selectedElement();
       if (sel) {
@@ -1943,6 +3004,270 @@ export class TicketEditorComponent implements OnDestroy {
   positionInput(e: Event, el: DesignElement, key: 'x' | 'y') {
     const val = Number((e.target as HTMLInputElement).value);
     this.updateElement(el.id, x => x[key] = val);
+  }
+
+  onCanvasDimensionChange(dim: 'width' | 'height', e: Event) {
+    const input = e.target as HTMLInputElement;
+    const val = Number(input.value);
+    this.updateCanvasDimension(dim, val);
+  }
+
+  updateCanvasDimension(key: 'width' | 'height', val: number | string) {
+    const fallback = key === 'width' ? 1050 : 600;
+    const num = Math.max(150, Math.min(4000, Math.round(Number(val) || fallback)));
+    this.design.update(cur => {
+      if (!cur) return cur;
+      const d = structuredClone(cur);
+      d[key] = num;
+      if (!d.config.canvas) d.config.canvas = { width: d.width, height: d.height };
+      d.config.canvas[key] = num;
+      this.history.push(structuredClone(d.config));
+      this.historyIndex.set(this.history.length - 1);
+      return d;
+    });
+    this.scheduleSave();
+  }
+
+  setCanvasPreset(width: number, height: number, typeName?: string) {
+    this.design.update(cur => {
+      if (!cur) return cur;
+      const d = structuredClone(cur);
+      d.width = width;
+      d.height = height;
+      if (typeName) d.type = typeName as DesignType;
+      if (!d.config.canvas) d.config.canvas = { width, height };
+      d.config.canvas.width = width;
+      d.config.canvas.height = height;
+      this.history.push(structuredClone(d.config));
+      this.historyIndex.set(this.history.length - 1);
+      return d;
+    });
+    this.scheduleSave();
+  }
+
+  onPresetSelectChange(e: Event) {
+    const val = (e.target as HTMLSelectElement).value;
+    if (!val) return;
+    const [dimStr, id] = val.split('|');
+    const [w, h] = dimStr.split('x').map(Number);
+    if (w && h) {
+      this.setCanvasPreset(w, h, id);
+    }
+  }
+
+  selectAiTheme(rec: AiThemeRecommendation) {
+    this.aiSelectedTheme.set(rec);
+    this.aiBrief = rec.prompt;
+  }
+
+  applyAiTheme(theme: AiThemeRecommendation) {
+    this.setCanvasPreset(theme.width, theme.height);
+    this.background.set(theme.background);
+    this.backgroundImage.set('');
+    this.backgroundMask.set('none');
+
+    this.design.update(cur => {
+      if (!cur) return cur;
+      const d = structuredClone(cur);
+      d.config.canvas.background = theme.background;
+      d.config.canvas.backgroundImage = '';
+      d.config.canvas.backgroundMask = 'none';
+
+      for (const el of d.config.elements) {
+        if (el.type === 'text') {
+          el['fontFamily'] = theme.font;
+          if (this.isPrimaryTicketNoEl(el)) {
+            el['ticketStyle'] = theme.ticketStyle;
+            el['badgeBg'] = theme.badgeBg;
+            el['badgeBorder'] = theme.badgeBorder;
+            el['color'] = theme.accent;
+          } else {
+            const fs = Number(el['fontSize']) || 24;
+            if (fs >= 28) {
+              el['color'] = theme.accent;
+            } else {
+              el['color'] = theme.ink;
+            }
+          }
+        } else if (el.type === 'qr') {
+          el['color'] = theme.accent;
+          el['qrBackground'] = theme.badgeBg;
+        } else if (el.type === 'rectangle' || el.type === 'circle') {
+          el['fill'] = theme.accent;
+        }
+      }
+
+      this.history.push(structuredClone(d.config));
+      this.historyIndex.set(this.history.length - 1);
+      return d;
+    });
+
+    const qrEl = this.design()?.config.elements.find(x => x.type === 'qr');
+    if (qrEl) this.generateQr(qrEl);
+    this.scheduleSave();
+  }
+
+  applyFullAiLayout(theme: AiThemeRecommendation) {
+    const w = theme.width;
+    const h = theme.height;
+    const ticketNo = this.formatTicketNumber(this.printPrefix(), this.printStartNo(), this.printPad(), this.printSuffix());
+    const eventName = this.design()?.name || 'CONCERT LIVE 2025';
+
+    const elements: DesignElement[] = [
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: 48,
+        y: 40,
+        text: `✦ ${theme.category.toUpperCase()} ✦`,
+        fontSize: 14,
+        fontWeight: 700,
+        fontFamily: theme.font,
+        color: theme.accent,
+        width: 300,
+        rotation: 0
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: 48,
+        y: 72,
+        text: eventName.toUpperCase(),
+        fontSize: Math.round(w * 0.042),
+        fontWeight: 800,
+        fontFamily: theme.font,
+        color: theme.ink,
+        width: Math.round(w * 0.65),
+        rotation: 0
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: 48,
+        y: 130,
+        text: 'SPECIAL PERFORMANCE • LIVE STAGE • OFFICIAL PASS',
+        fontSize: 16,
+        fontWeight: 500,
+        fontFamily: theme.font,
+        color: theme.accent,
+        width: Math.round(w * 0.6),
+        rotation: 0
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: 48,
+        y: Math.round(h * 0.42),
+        text: 'SABTU, 28 DESEMBER 2025 • 19:00 WIB',
+        fontSize: 18,
+        fontWeight: 700,
+        fontFamily: theme.font,
+        color: theme.ink,
+        width: 400,
+        rotation: 0
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: 48,
+        y: Math.round(h * 0.52),
+        text: 'STADION UTAMA GELORA BUNG KARNO, JAKARTA',
+        fontSize: 15,
+        fontWeight: 500,
+        fontFamily: theme.font,
+        color: theme.accent,
+        width: 450,
+        rotation: 0
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: 48,
+        y: Math.round(h * 0.68),
+        text: 'GATE 03 • ROW A • SEAT 14',
+        fontSize: 17,
+        fontWeight: 700,
+        fontFamily: 'Space Mono',
+        color: theme.ink,
+        width: 320,
+        rotation: 0
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: Math.round(w - 280),
+        y: 40,
+        text: ticketNo,
+        fontSize: 22,
+        fontWeight: 700,
+        fontFamily: 'Space Mono',
+        color: theme.accent,
+        width: 240,
+        rotation: 0,
+        isTicketNo: true,
+        ticketPrefix: this.printPrefix(),
+        ticketStart: this.printStartNo(),
+        ticketPad: this.printPad(),
+        ticketSuffix: this.printSuffix(),
+        ticketStyle: theme.ticketStyle,
+        badgeBg: theme.badgeBg,
+        badgeBorder: theme.badgeBorder,
+        badgeBorderWidth: 1.5,
+        badgeRadius: 999
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'qr',
+        x: Math.round(w - 230),
+        y: Math.round(h * 0.35),
+        width: 170,
+        height: 170,
+        value: `https://ticketforge.local/verify?ticket=${ticketNo}`,
+        color: theme.accent,
+        qrBackground: theme.badgeBg,
+        rotation: 0
+      },
+      {
+        id: crypto.randomUUID(),
+        type: 'text',
+        x: Math.round(w - 230),
+        y: Math.round(h * 0.35 + 180),
+        text: 'SCAN UNTUK VALIDASI',
+        fontSize: 12,
+        fontWeight: 700,
+        fontFamily: 'Space Mono',
+        color: theme.accent,
+        width: 170,
+        textAlign: 'center',
+        rotation: 0
+      }
+    ];
+
+    this.setCanvasPreset(w, h);
+    this.background.set(theme.background);
+    this.backgroundImage.set('');
+    this.backgroundMask.set('none');
+
+    this.design.update(cur => {
+      if (!cur) return cur;
+      const d = structuredClone(cur);
+      d.config.canvas.background = theme.background;
+      d.config.canvas.backgroundImage = '';
+      d.config.canvas.backgroundMask = 'none';
+      d.config.elements = elements;
+      this.history.push(structuredClone(d.config));
+      this.historyIndex.set(this.history.length - 1);
+      return d;
+    });
+
+    const qrEl = this.design()?.config.elements.find(x => x.type === 'qr');
+    if (qrEl) this.generateQr(qrEl);
+    this.scheduleSave();
+  }
+
+  selectTicketFromGrid(index: number) {
+    this.pdfCurrentPage.set(index);
+    this.pdfViewMode.set('document');
   }
 
   dimensionInput(e: Event, el: DesignElement, key: 'width' | 'height') {
@@ -2099,6 +3424,7 @@ export class TicketEditorComponent implements OnDestroy {
   }
 
   startDrag(e: PointerEvent, el: DesignElement) {
+    if (this.activeTool() === 'pen') return;
     if ((e.target as HTMLElement).isContentEditable) return;
     e.preventDefault();
     e.stopPropagation();
@@ -2174,11 +3500,22 @@ export class TicketEditorComponent implements OnDestroy {
     }
   };
 
-  private mutate(fn: (d: Design) => void, save = true) {
+  private mutate(fn: (d: Design) => void, save = true, recordHistory = true) {
     this.design.update(cur => {
       if (!cur) return cur;
       const d = structuredClone(cur);
       fn(d);
+
+      if (recordHistory && !this.isUndoingOrRedoing) {
+        const nextConfig = structuredClone(d.config);
+        const curIdx = this.historyIndex();
+        const newHist = this.history.slice(0, curIdx + 1);
+        newHist.push(nextConfig);
+        if (newHist.length > 60) newHist.shift();
+        this.history = newHist;
+        this.historyIndex.set(newHist.length - 1);
+      }
+
       return d;
     });
     if (save) this.scheduleSave();
@@ -2223,6 +3560,75 @@ export class TicketEditorComponent implements OnDestroy {
         }
       });
     }, 600);
+  }
+
+  isPrimaryTicketNoEl(el: DesignElement): boolean {
+    if (el.type !== 'text') return false;
+    if (el['isTicketNo'] || el['isTicketNumber']) return true;
+    const primary = this.getPrimaryTicketNoElement();
+    return primary?.id === el.id;
+  }
+
+  hasTicketNoInElements(): boolean {
+    return this.getPrimaryTicketNoElement() !== null;
+  }
+
+  getPrimaryTicketNoElement(): DesignElement | null {
+    const elements = this.design()?.config.elements || [];
+    // 1. Explicit ticket number element
+    const explicit = elements.find(x => x.type === 'text' && (x['isTicketNo'] || x['isTicketNumber']));
+    if (explicit) return explicit;
+
+    // 2. Element matching ticket number patterns (e.g. TCK-..., NO: ..., 0001, etc.)
+    const pattern = /^(TCK|TIK|TKT|NO|NUM|INV|VIP|ADM|#)[\s\-\:\.\/]?\d+|\b\d{3,}\b/i;
+    const matched = elements.find(x => x.type === 'text' && pattern.test(String(x['text'] || '').trim()));
+    if (matched) return matched;
+
+    // 3. Match against current printPrefix
+    const prefix = this.printPrefix().trim();
+    if (prefix.length >= 2) {
+      const prefixMatched = elements.find(x => x.type === 'text' && String(x['text'] || '').includes(prefix));
+      if (prefixMatched) return prefixMatched;
+    }
+
+    return null;
+  }
+
+  autoTicketBadgeStyle(): Record<string, string> {
+    return {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '4px 14px',
+      borderRadius: '999px',
+      backgroundColor: '#ffffff',
+      color: '#0d99ff',
+      border: '1.5px solid #0d99ff',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+      fontWeight: '700',
+      letterSpacing: '1px'
+    };
+  }
+
+  getTicketNoForSheet(index: number): string {
+    const prefix = this.printPrefix();
+    const start = Number(this.printStartNo()) || 1;
+    const pad = Number(this.printPad()) || 0;
+    const suffix = this.printSuffix();
+    return this.formatTicketNumber(prefix, start + index, pad, suffix);
+  }
+
+  setActiveSheet(index: number) {
+    this.activeSheetIndex.set(index);
+  }
+
+  incrementSheetCount() {
+    this.printCount.update(c => Math.min(1000, c + 1));
+    this.setActiveSheet(this.printCount() - 1);
+  }
+
+  modalPreviewScale(): number {
+    return 0.42;
   }
 
   formatTicketNumber(prefix: string, num: number, pad: number, suffix: string): string {
@@ -2472,12 +3878,25 @@ export class TicketEditorComponent implements OnDestroy {
     if (!d) return;
 
     this.printBusy.set(true);
-    const count = this.printCount();
+    const count = Math.max(1, Number(this.printCount()) || 1);
     const prefix = this.printPrefix();
     const start = Number(this.printStartNo()) || 1;
     const pad = Number(this.printPad()) || 0;
     const suffix = this.printSuffix();
     const syncQr = this.printSyncQr();
+
+    // Mark and synchronize the primary ticket number element in the design if present
+    const targetEl = this.getPrimaryTicketNoElement();
+    if (targetEl) {
+      this.updateElement(targetEl.id, x => {
+        x['isTicketNo'] = true;
+        x['ticketPrefix'] = prefix;
+        x['ticketStart'] = start;
+        x['ticketPad'] = pad;
+        x['ticketSuffix'] = suffix;
+        x['text'] = this.formatTicketNumber(prefix, start, pad, suffix);
+      }, true);
+    }
 
     const pages: Array<{ ticketNo: string; qrDataUrl?: string }> = [];
 
@@ -2485,8 +3904,10 @@ export class TicketEditorComponent implements OnDestroy {
     const qrColor = String(qrEl?.['color'] || '#1e293b');
     const qrBg = String(qrEl?.['qrBackground'] || '#ffffff');
 
+    // Generate perfectly sequential ticket numbers: start, start + 1, start + 2, ..., start + count - 1
     for (let i = 0; i < count; i++) {
-      const ticketNo = this.formatTicketNumber(prefix, start + i, pad, suffix);
+      const currentNumber = start + i;
+      const ticketNo = this.formatTicketNumber(prefix, currentNumber, pad, suffix);
       let pageQrUrl = '';
 
       if (syncQr) {
@@ -2509,14 +3930,829 @@ export class TicketEditorComponent implements OnDestroy {
     this.printBusy.set(false);
     this.printModalOpen.set(false);
 
+    // Give DOM 450ms to render all sequential pages before opening print dialog
     setTimeout(() => {
       document.body.classList.add('printing-ticket');
       window.print();
       setTimeout(() => {
         document.body.classList.remove('printing-ticket');
         this.printPages.set([]);
-      }, 1000);
-    }, 400);
+      }, 1500);
+    }, 450);
+  }
+
+
+  undo() {
+    if (this.activeTool() === 'pen' && this.penPoints().length > 0) {
+      this.undoPenPoint();
+      return;
+    }
+
+    if (!this.canUndo()) return;
+    const targetIdx = this.historyIndex() - 1;
+    if (targetIdx < 0 || targetIdx >= this.history.length) return;
+
+    const prevConfig = structuredClone(this.history[targetIdx]);
+    this.isUndoingOrRedoing = true;
+    this.historyIndex.set(targetIdx);
+
+    this.design.update(cur => {
+      if (!cur) return cur;
+      const d = structuredClone(cur);
+      d.config = prevConfig;
+      return d;
+    });
+
+    this.background.set(prevConfig.canvas?.background || '#f4f1e8');
+    this.backgroundImage.set(String(prevConfig.canvas?.backgroundImage || ''));
+    this.backgroundMask.set(String(prevConfig.canvas?.backgroundMask || 'none'));
+
+    for (const el of prevConfig.elements || []) {
+      if (el.type === 'qr') {
+        this.generateQr(el);
+      }
+    }
+
+    this.scheduleSave();
+    this.isUndoingOrRedoing = false;
+  }
+
+  redo() {
+    if (!this.canRedo()) return;
+    const targetIdx = this.historyIndex() + 1;
+    if (targetIdx >= this.history.length) return;
+
+    const nextConfig = structuredClone(this.history[targetIdx]);
+    this.isUndoingOrRedoing = true;
+    this.historyIndex.set(targetIdx);
+
+    this.design.update(cur => {
+      if (!cur) return cur;
+      const d = structuredClone(cur);
+      d.config = nextConfig;
+      return d;
+    });
+
+    this.background.set(nextConfig.canvas?.background || '#f4f1e8');
+    this.backgroundImage.set(String(nextConfig.canvas?.backgroundImage || ''));
+    this.backgroundMask.set(String(nextConfig.canvas?.backgroundMask || 'none'));
+
+    for (const el of nextConfig.elements || []) {
+      if (el.type === 'qr') {
+        this.generateQr(el);
+      }
+    }
+
+    this.scheduleSave();
+    this.isUndoingOrRedoing = false;
+  }
+
+  setTool(tool: 'select' | 'pen') {
+    this.activeTool.set(tool);
+    if (tool === 'select') {
+      this.penHoverPoint.set(null);
+    }
+  }
+
+  triggerUploadImage() {
+    this.topbarLogoInput?.nativeElement.click();
+  }
+
+  onCanvasStageMove(e: PointerEvent) {
+    if (this.activeTool() !== 'pen') return;
+    const rect = this.canvasEl?.nativeElement.getBoundingClientRect();
+    if (!rect) return;
+    const scale = this.canvasScale();
+    this.penHoverPoint.set({
+      x: Math.round((e.clientX - rect.left) / scale),
+      y: Math.round((e.clientY - rect.top) / scale)
+    });
+  }
+
+  onPenSvgClick(e: PointerEvent) {
+    if (this.activeTool() !== 'pen') return;
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = this.canvasEl?.nativeElement.getBoundingClientRect();
+    if (!rect) return;
+    const scale = this.canvasScale();
+    const x = Math.round((e.clientX - rect.left) / scale);
+    const y = Math.round((e.clientY - rect.top) / scale);
+    this.penPoints.update(pts => [...pts, { x, y }]);
+  }
+
+  onPenAnchorClick(index: number, e: PointerEvent) {
+    e.stopPropagation();
+    if (index === 0 && this.penPoints().length >= 3) {
+      this.applyPenClippingMask();
+    }
+  }
+
+  onPenStartNodeClick(e: PointerEvent) {
+    e.stopPropagation();
+    if (this.penPoints().length >= 3) {
+      this.applyPenClippingMask();
+    }
+  }
+
+  penSvgPoints(): string {
+    return this.penPoints().map(p => `${p.x},${p.y}`).join(' ');
+  }
+
+  undoPenPoint() {
+    this.penPoints.update(pts => pts.slice(0, -1));
+  }
+
+  exitPenTool() {
+    this.penPoints.set([]);
+    this.penHoverPoint.set(null);
+    this.activeTool.set('select');
+  }
+
+  applyPenClippingMask() {
+    const pts = this.penPoints();
+    if (pts.length < 3) return;
+    const sel = this.selectedElement();
+    if (sel && (sel.type === 'image' || sel.type === 'rectangle' || sel.type === 'circle')) {
+      const w = Math.max(1, this.number(sel['width'], 100));
+      const h = Math.max(1, this.number(sel['height'], 100));
+      const poly = 'polygon(' + pts.map(p => {
+        const px = Math.max(0, Math.min(100, Math.round(((p.x - sel.x) / w) * 1000) / 10));
+        const py = Math.max(0, Math.min(100, Math.round(((p.y - sel.y) / h) * 1000) / 10));
+        return `${px}% ${py}%`;
+      }).join(', ') + ')';
+      this.updateElement(sel.id, x => x['clip'] = poly);
+    } else {
+      const d = this.design();
+      if (d) {
+        const poly = 'polygon(' + pts.map(p => {
+          const px = Math.max(0, Math.min(100, Math.round((p.x / d.width) * 1000) / 10));
+          const py = Math.max(0, Math.min(100, Math.round((p.y / d.height) * 1000) / 10));
+          return `${px}% ${py}%`;
+        }).join(', ') + ')';
+        this.backgroundMask.set(poly);
+        this.mutate(cur => cur.config.canvas.backgroundMask = poly);
+      }
+    }
+    this.exitPenTool();
+  }
+
+  createPenVectorShape() {
+    const pts = this.penPoints();
+    if (pts.length < 3) return;
+    const xs = pts.map(p => p.x);
+    const ys = pts.map(p => p.y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const width = Math.max(30, maxX - minX);
+    const height = Math.max(30, maxY - minY);
+    const poly = 'polygon(' + pts.map(p => {
+      const px = Math.max(0, Math.min(100, Math.round(((p.x - minX) / width) * 1000) / 10));
+      const py = Math.max(0, Math.min(100, Math.round(((p.y - minY) / height) * 1000) / 10));
+      return `${px}% ${py}%`;
+    }).join(', ') + ')';
+
+    this.addElement({
+      id: crypto.randomUUID(),
+      type: 'rectangle',
+      x: minX,
+      y: minY,
+      width,
+      height,
+      fill: '#0d99ff',
+      clip: poly,
+      rotation: 0
+    });
+    this.exitPenTool();
+  }
+
+  startTracingSelectedElement(el: DesignElement) {
+    this.selectedId.set(el.id);
+    this.setTool('pen');
+    this.penPoints.set([]);
+  }
+
+  removeElementMask(el: DesignElement) {
+    this.updateElement(el.id, x => x['clip'] = 'none');
+  }
+
+  isCustomPolygon(val: unknown): boolean {
+    return typeof val === 'string' && val.startsWith('polygon(');
+  }
+
+  closePdfViewerModal() {
+    this.pdfViewerModalOpen.set(false);
+  }
+
+  zoomInPdf() {
+    this.pdfZoom.update(z => Math.min(2.0, Math.round((z + 0.15) * 100) / 100));
+  }
+
+  zoomOutPdf() {
+    this.pdfZoom.update(z => Math.max(0.35, Math.round((z - 0.15) * 100) / 100));
+  }
+
+  resetZoomPdf() {
+    this.pdfZoom.set(0.75);
+  }
+
+  printFromPdfViewer() {
+    this.closePdfViewerModal();
+    this.executeBatchPrint();
+  }
+
+  async openFullPdfPreview() {
+    this.pdfGenerating.set(true);
+    this.pdfProgress.set(0);
+
+    try {
+      const items = await this.generatePdfPagesData();
+      this.pdfPageItems.set(items);
+      this.pdfCurrentPage.set(0);
+      this.pdfZoom.set(0.75);
+      this.pdfViewerModalOpen.set(true);
+    } catch (err) {
+      console.error('Error opening PDF preview:', err);
+      this.error.set('Gagal memuat pratinjau PDF. Periksa gambar dan elemen tiket.');
+    } finally {
+      this.pdfGenerating.set(false);
+    }
+  }
+
+  async saveDirectPdf() {
+    this.pdfGenerating.set(true);
+    this.pdfProgress.set(0);
+
+    try {
+      const items = await this.generatePdfPagesData();
+      this.pdfPageItems.set(items);
+      this.downloadPdfFile();
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      this.error.set('Gagal membuat file PDF. Silakan coba lagi.');
+    } finally {
+      this.pdfGenerating.set(false);
+    }
+  }
+
+  downloadPdfFile() {
+    const items = this.pdfPageItems();
+    if (items.length === 0) return;
+
+    const layout = this.getEffectiveLayout();
+    const isLandscape = layout.orientation === 'landscape';
+    // Standard A4 in PDF points (72 pt/inch, 210 x 297 mm): 595 x 842 pt
+    const widthPt = isLandscape ? 842 : 595;
+    const heightPt = isLandscape ? 595 : 842;
+
+    const pdfUint8 = this.buildPdfFromDataUrls(items.map(it => it.dataUrl), widthPt, heightPt);
+    const blob = new Blob([pdfUint8.buffer], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    const cleanName = (this.design()?.name || 'Tiket').replace(/[^a-zA-Z0-9_\-]/g, '_');
+    const sheetCount = items.length;
+    const ticketCount = this.printCount();
+    a.download = `${cleanName}-${ticketCount}Tiket-${sheetCount}LembarA4.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 25000);
+  }
+
+  async generatePdfPagesData(): Promise<Array<{ ticketNo: string; dataUrl: string }>> {
+    const d = this.design();
+    if (!d) return [];
+
+    const count = Math.max(1, Number(this.printCount()) || 1);
+    const layout = this.getEffectiveLayout();
+    const perSheet = layout.perSheet;
+    const totalSheets = Math.ceil(count / perSheet);
+
+    const prefix = this.printPrefix();
+    const start = Number(this.printStartNo()) || 1;
+    const pad = Number(this.printPad()) || 0;
+    const suffix = this.printSuffix();
+    const syncQr = this.printSyncQr();
+    const showCutLines = this.printShowCutLines();
+    const showCropMarks = this.printShowCropMarks();
+
+    const qrEl = d.config.elements.find(x => x.type === 'qr');
+    const qrColor = String(qrEl?.['color'] || '#1e293b');
+    const qrBg = String(qrEl?.['qrBackground'] || '#ffffff');
+
+    // Pre-cache background and logo images so they aren't reloaded repeatedly
+    let cachedBgImg: HTMLImageElement | null = null;
+    if (this.backgroundImage()) {
+      try {
+        cachedBgImg = await this.loadImage(this.backgroundImage());
+      } catch (e) {
+        console.warn('Failed to pre-cache background image:', e);
+      }
+    }
+
+    const cachedImages = new Map<string, HTMLImageElement>();
+    for (const el of d.config.elements) {
+      if (el.type === 'image' && el['src']) {
+        try {
+          const img = await this.loadImage(String(el['src']));
+          cachedImages.set(el.id, img);
+        } catch (e) {
+          console.warn('Failed to pre-cache image element:', el.id, e);
+        }
+      }
+    }
+
+    // A4 sheet canvas dimensions: 2970 x 2100 px (Landscape) or 2100 x 2970 px (Portrait)
+    const isLandscape = layout.orientation === 'landscape';
+    const sheetWidth = isLandscape ? 2970 : 2100;
+    const sheetHeight = isLandscape ? 2100 : 2970;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = sheetWidth;
+    canvas.height = sheetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return [];
+
+    const items: Array<{ ticketNo: string; dataUrl: string }> = [];
+
+    // Pre-generate all QR codes needed for the batch
+    const qrCache = new Map<string, HTMLImageElement | null>();
+    for (let i = 0; i < count; i++) {
+      const ticketNo = this.formatTicketNumber(prefix, start + i, pad, suffix);
+      if (syncQr) {
+        try {
+          const qrUrl = await QRCode.toDataURL(ticketNo, {
+            width: 280,
+            margin: 1,
+            color: { dark: qrColor, light: qrBg },
+            errorCorrectionLevel: 'H'
+          });
+          const img = await this.loadImage(qrUrl);
+          qrCache.set(ticketNo, img);
+        } catch {
+          qrCache.set(ticketNo, null);
+        }
+      }
+    }
+
+    // Render each A4 paper sheet containing multiple tickets and cutting guides
+    for (let s = 0; s < totalSheets; s++) {
+      const startIdx = s * perSheet;
+      const endIdx = Math.min(count, startIdx + perSheet);
+      const sheetTickets: Array<{ ticketNo: string; qrImg: HTMLImageElement | null }> = [];
+
+      for (let i = startIdx; i < endIdx; i++) {
+        const ticketNo = this.formatTicketNumber(prefix, start + i, pad, suffix);
+        const qrImg = qrCache.get(ticketNo) || null;
+        sheetTickets.push({ ticketNo, qrImg });
+      }
+
+      const dataUrl = this.renderSheetWithMultipleTickets(
+        canvas,
+        ctx,
+        sheetWidth,
+        sheetHeight,
+        layout,
+        sheetTickets,
+        {
+          cachedBgImg,
+          cachedImages,
+          showCutLines,
+          showCropMarks,
+          sheetIndex: s,
+          totalSheets
+        }
+      );
+
+      const firstNo = sheetTickets[0]?.ticketNo || '';
+      const lastNo = sheetTickets[sheetTickets.length - 1]?.ticketNo || '';
+      const sheetLabel = sheetTickets.length > 1 ? `${firstNo} – ${lastNo} (${sheetTickets.length} Tiket)` : firstNo;
+
+      items.push({ ticketNo: sheetLabel, dataUrl });
+      this.pdfProgress.set(Math.round(((s + 1) / totalSheets) * 100));
+
+      if (s % 2 === 0 && s > 0) {
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    return items;
+  }
+
+  renderSheetWithMultipleTickets(
+    canvas: HTMLCanvasElement,
+    ctx: CanvasRenderingContext2D,
+    sheetWidth: number,
+    sheetHeight: number,
+    layout: { cols: number; rows: number; perSheet: number; orientation: 'portrait' | 'landscape' },
+    sheetTickets: Array<{ ticketNo: string; qrImg: HTMLImageElement | null }>,
+    opt: {
+      cachedBgImg: HTMLImageElement | null;
+      cachedImages: Map<string, HTMLImageElement>;
+      showCutLines: boolean;
+      showCropMarks: boolean;
+      sheetIndex: number;
+      totalSheets: number;
+    }
+  ): string {
+    const d = this.design();
+    if (!d) return '';
+
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // 1. Draw Paper Sheet Background (Pure White Paper)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, sheetWidth, sheetHeight);
+
+    const marginX = 100;
+    const marginTop = 120;
+    const marginBottom = 100;
+    const availW = sheetWidth - marginX * 2;
+    const availH = sheetHeight - marginTop - marginBottom;
+
+    const cols = layout.cols;
+    const rows = layout.rows;
+    const gapX = cols > 1 ? 40 : 0;
+    const gapY = rows > 1 ? 40 : 0;
+
+    const cellW = (availW - (cols - 1) * gapX) / cols;
+    const cellH = (availH - (rows - 1) * gapY) / rows;
+
+    const ticketW = d.width || 1050;
+    const ticketH = d.height || 600;
+
+    // 2. Render each ticket inside its cell
+    for (let i = 0; i < sheetTickets.length; i++) {
+      const ticket = sheetTickets[i];
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+
+      const cellX = marginX + col * (cellW + gapX);
+      const cellY = marginTop + row * (cellH + gapY);
+
+      // Fit ticket proportionally inside cell with 12px safe inner breathing room
+      const safePad = 12;
+      const scale = Math.min((cellW - safePad * 2) / ticketW, (cellH - safePad * 2) / ticketH);
+      const drawnW = ticketW * scale;
+      const drawnH = ticketH * scale;
+      const tx = cellX + (cellW - drawnW) / 2;
+      const ty = cellY + (cellH - drawnH) / 2;
+
+      ctx.save();
+      ctx.translate(tx, ty);
+      ctx.scale(scale, scale);
+
+      // Draw ticket background
+      ctx.fillStyle = this.backgroundImage() ? '#ffffff' : this.background();
+      ctx.fillRect(0, 0, ticketW, ticketH);
+
+      if (opt.cachedBgImg) {
+        ctx.drawImage(opt.cachedBgImg, 0, 0, ticketW, ticketH);
+      }
+
+      // Draw ticket elements
+      for (const el of d.config.elements) {
+        if (el.type === 'background') continue;
+
+        ctx.save();
+        const ex = el.x;
+        const ey = el.y;
+        const rot = (Number(el['rotation']) || 0) * (Math.PI / 180);
+
+        ctx.translate(ex, ey);
+        if (rot) ctx.rotate(rot);
+
+        if (el.type === 'rectangle') {
+          const w = Number(el['width']) || 120;
+          const h = Number(el['height']) || 70;
+          ctx.fillStyle = String(el['fill'] || '#0d99ff');
+          ctx.fillRect(0, 0, w, h);
+        } else if (el.type === 'circle') {
+          const w = Number(el['width']) || 120;
+          const h = Number(el['height']) || 70;
+          ctx.fillStyle = String(el['fill'] || '#0d99ff');
+          ctx.beginPath();
+          ctx.ellipse(w / 2, h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (el.type === 'image') {
+          const w = Number(el['width']) || 140;
+          const h = Number(el['height']) || 90;
+          const img = opt.cachedImages.get(el.id);
+          if (img) ctx.drawImage(img, 0, 0, w, h);
+        } else if (el.type === 'qr') {
+          const w = Number(el['width']) || 120;
+          const h = Number(el['height']) || 120;
+          if (ticket.qrImg) ctx.drawImage(ticket.qrImg, 0, 0, w, h);
+        } else if (el.type === 'text') {
+          const isTicket = this.isPrimaryTicketNoEl(el);
+          const textToDraw = isTicket ? ticket.ticketNo : String(el['text'] || '');
+          const fontSize = Number(el['fontSize']) || 24;
+          const fontWeight = el['fontWeight'] || 600;
+          const fontFamily = el['fontFamily'] || 'DM Sans';
+          const color = String(el['color'] || '#1e293b');
+
+          ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}", sans-serif`;
+
+          if (isTicket && el['ticketStyle'] && el['ticketStyle'] !== 'plain') {
+            const metrics = ctx.measureText(textToDraw);
+            const textW = metrics.width;
+            const padX = 14;
+            const padY = 6;
+            const badgeW = textW + padX * 2;
+            const badgeH = fontSize + padY * 2;
+
+            const bg = String(el['badgeBg'] || '#ffffff');
+            const border = String(el['badgeBorder'] || '#0d99ff');
+            const radius = Number(el['badgeRadius']) || (el['ticketStyle'] === 'pill' ? 999 : 6);
+
+            ctx.fillStyle = bg;
+            this.drawRoundedRect(ctx, 0, -fontSize * 0.9, badgeW, badgeH, radius);
+            ctx.fill();
+
+            if (border) {
+              ctx.strokeStyle = border;
+              ctx.lineWidth = Number(el['badgeBorderWidth']) || 1.5;
+              ctx.stroke();
+            }
+
+            ctx.fillStyle = color;
+            ctx.fillText(textToDraw, padX, -fontSize * 0.9 + padY + fontSize * 0.72);
+          } else {
+            ctx.fillStyle = color;
+            ctx.fillText(textToDraw, 0, fontSize * 0.82);
+          }
+        }
+
+        ctx.restore();
+      }
+
+      // Fallback ticket badge if not explicit
+      if (!this.hasTicketNoInElements()) {
+        ctx.save();
+        const textToDraw = ticket.ticketNo;
+        const fontSize = 22;
+        ctx.font = `700 ${fontSize}px "Space Mono", monospace`;
+        const metrics = ctx.measureText(textToDraw);
+        const badgeW = metrics.width + 28;
+        const badgeH = fontSize + 16;
+        const bx = ticketW - badgeW - 36;
+        const by = 36;
+
+        ctx.fillStyle = '#ffffff';
+        this.drawRoundedRect(ctx, bx, by, badgeW, badgeH, 999);
+        ctx.fill();
+
+        ctx.strokeStyle = '#0d99ff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = '#0d99ff';
+        ctx.fillText(textToDraw, bx + 14, by + fontSize + 3);
+        ctx.restore();
+      }
+
+      ctx.restore();
+
+      // Corner crop marks around ticket for cutting precision
+      if (opt.showCropMarks) {
+        const markLen = 22;
+        const markDist = 8;
+        ctx.save();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.5;
+
+        // Top-left
+        ctx.beginPath();
+        ctx.moveTo(tx - markDist, ty);
+        ctx.lineTo(tx - markDist - markLen, ty);
+        ctx.moveTo(tx, ty - markDist);
+        ctx.lineTo(tx, ty - markDist - markLen);
+
+        // Top-right
+        ctx.moveTo(tx + drawnW + markDist, ty);
+        ctx.lineTo(tx + drawnW + markDist + markLen, ty);
+        ctx.moveTo(tx + drawnW, ty - markDist);
+        ctx.lineTo(tx + drawnW, ty - markDist - markLen);
+
+        // Bottom-left
+        ctx.moveTo(tx - markDist, ty + drawnH);
+        ctx.lineTo(tx - markDist - markLen, ty + drawnH);
+        ctx.moveTo(tx, ty + drawnH + markDist);
+        ctx.lineTo(tx, ty + drawnH + markDist - markLen);
+
+        // Bottom-right
+        ctx.moveTo(tx + drawnW + markDist, ty + drawnH);
+        ctx.lineTo(tx + drawnW + markDist + markLen, ty + drawnH);
+        ctx.moveTo(tx + drawnW, ty + drawnH + markDist);
+        ctx.lineTo(tx + drawnW, ty + drawnH + markDist + markLen);
+
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 3. Draw Dashed Cutting Guides with Scissor Icons (Garis Potong)
+    if (opt.showCutLines) {
+      ctx.save();
+      ctx.setLineDash([12, 10]);
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.8;
+
+      // Vertical cutting lines between columns
+      for (let c = 1; c < cols; c++) {
+        const cutX = marginX + c * cellW + (c - 0.5) * gapX;
+        ctx.beginPath();
+        ctx.moveTo(cutX, marginTop - 30);
+        ctx.lineTo(cutX, sheetHeight - marginBottom + 30);
+        ctx.stroke();
+
+        // Draw scissor symbols along the vertical line
+        ctx.save();
+        ctx.font = '20px sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✂', cutX, marginTop - 15);
+        ctx.fillText('✂', cutX, (marginTop + sheetHeight - marginBottom) / 2);
+        ctx.fillText('✂', cutX, sheetHeight - marginBottom + 15);
+        ctx.restore();
+      }
+
+      // Horizontal cutting lines between rows
+      for (let r = 1; r < rows; r++) {
+        const cutY = marginTop + r * cellH + (r - 0.5) * gapY;
+        ctx.beginPath();
+        ctx.moveTo(marginX - 30, cutY);
+        ctx.lineTo(sheetWidth - marginX + 30, cutY);
+        ctx.stroke();
+
+        // Draw scissor symbols along the horizontal line
+        ctx.save();
+        ctx.font = '20px sans-serif';
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('✂', marginX - 15, cutY);
+        ctx.fillText('✂', (marginX + sheetWidth - marginX) / 2, cutY);
+        ctx.fillText('✂', sheetWidth - marginX + 15, cutY);
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    // 4. Header & Footer Sheet Info
+    ctx.save();
+    ctx.font = '600 18px "DM Sans", sans-serif';
+    ctx.fillStyle = '#475569';
+    ctx.fillText(`${d.name} • Lembar ${opt.sheetIndex + 1} dari ${opt.totalSheets} • ${sheetTickets.length} Tiket per Lembar (Format A4)`, marginX, marginTop - 50);
+
+    ctx.font = '700 16px monospace';
+    ctx.fillStyle = '#0d99ff';
+    ctx.textAlign = 'right';
+    ctx.fillText(`✂ PANDUAN POTONG: Gunting Mengikuti Garis Putus-Putus`, sheetWidth - marginX, marginTop - 50);
+
+    ctx.font = '500 15px monospace';
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Nomor Tiket Lembar Ini: ${sheetTickets.map(t => t.ticketNo).join(', ')}`, marginX, sheetHeight - marginBottom + 55);
+
+    ctx.textAlign = 'right';
+    ctx.fillText(`Dicetak dengan TicketForge AI • Hemat Kertas A4`, sheetWidth - marginX, sheetHeight - marginBottom + 55);
+    ctx.restore();
+
+    ctx.restore();
+    return canvas.toDataURL('image/jpeg', 0.92);
+  }
+
+    drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+    ctx.beginPath();
+    const rad = Math.min(r, w / 2, h / 2);
+    ctx.moveTo(x + rad, y);
+    ctx.lineTo(x + w - rad, y);
+    ctx.arcTo(x + w, y, x + w, y + rad, rad);
+    ctx.lineTo(x + w, y + h - rad);
+    ctx.arcTo(x + w, y + h, x + w - rad, y + h, rad);
+    ctx.lineTo(x + rad, y + h);
+    ctx.arcTo(x, y + h, x, y + h - rad, rad);
+    ctx.lineTo(x, y + rad);
+    ctx.arcTo(x, y, x + rad, y, rad);
+    ctx.closePath();
+  }
+
+  loadImage(src: string): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  buildPdfFromDataUrls(jpegDataUrls: string[], widthPt = 842, heightPt = 595): Uint8Array {
+    const pageCount = jpegDataUrls.length;
+    const objects: Array<{ id: number; data: Uint8Array | string }> = [];
+    const pageObjIds: number[] = [];
+
+    for (let i = 0; i < pageCount; i++) {
+      const pageId = 3 + i * 3;
+      pageObjIds.push(pageId);
+    }
+
+    objects.push({ id: 1, data: '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj' });
+    objects.push({
+      id: 2,
+      data: `2 0 obj\n<< /Type /Pages /Kids [${pageObjIds.map(id => `${id} 0 R`).join(' ')}] /Count ${pageCount} >>\nendobj`
+    });
+
+    const encoder = new TextEncoder();
+
+    for (let i = 0; i < pageCount; i++) {
+      const pageId = pageObjIds[i];
+      const contentId = pageId + 1;
+      const imgId = pageId + 2;
+      const imgName = `Im${i + 1}`;
+
+      const base64 = (jpegDataUrls[i].split(',')[1] || jpegDataUrls[i]).trim();
+      const binaryStr = atob(base64);
+      const imgBytes = new Uint8Array(binaryStr.length);
+      for (let j = 0; j < binaryStr.length; j++) {
+        imgBytes[j] = binaryStr.charCodeAt(j);
+      }
+
+      const imgW = Math.round(widthPt * 2);
+      const imgH = Math.round(heightPt * 2);
+
+      objects.push({
+        id: pageId,
+        data: `${pageId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${widthPt} ${heightPt}] /Contents ${contentId} 0 R /Resources << /XObject << /${imgName} ${imgId} 0 R >> >> >>\nendobj`
+      });
+
+      const streamContent = `q ${widthPt} 0 0 ${heightPt} 0 0 cm /${imgName} Do Q`;
+      objects.push({
+        id: contentId,
+        data: `${contentId} 0 obj\n<< /Length ${streamContent.length} >>\nstream\n${streamContent}\nendstream\nendobj`
+      });
+
+      const header = `${imgId} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${imgW} /Height ${imgH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imgBytes.length} >>\nstream\n`;
+      const footer = '\nendstream\nendobj';
+
+      const hBytes = encoder.encode(header);
+      const fBytes = encoder.encode(footer);
+      const fullImgObj = new Uint8Array(hBytes.length + imgBytes.length + fBytes.length);
+      fullImgObj.set(hBytes, 0);
+      fullImgObj.set(imgBytes, hBytes.length);
+      fullImgObj.set(fBytes, hBytes.length + imgBytes.length);
+
+      objects.push({ id: imgId, data: fullImgObj });
+    }
+
+    objects.sort((a, b) => a.id - b.id);
+
+    const pdfHeader = encoder.encode('%PDF-1.4\n');
+    const chunks: Uint8Array[] = [pdfHeader];
+    let currentOffset = pdfHeader.length;
+    const offsets: number[] = [];
+
+    for (const obj of objects) {
+      offsets.push(currentOffset);
+      let bytes: Uint8Array;
+      if (typeof obj.data === 'string') {
+        bytes = encoder.encode(obj.data + '\n');
+      } else {
+        const newline = encoder.encode('\n');
+        const combined = new Uint8Array(obj.data.length + 1);
+        combined.set(obj.data, 0);
+        combined.set(newline, obj.data.length);
+        bytes = combined;
+      }
+      chunks.push(bytes);
+      currentOffset += bytes.length;
+    }
+
+    const startXref = currentOffset;
+    let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+    for (const off of offsets) {
+      xref += `${String(off).padStart(10, '0')} 00000 n \n`;
+    }
+    const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${startXref}\n%%EOF`;
+    chunks.push(encoder.encode(xref + trailer));
+
+    const totalLength = chunks.reduce((sum, c) => sum + c.length, 0);
+    const result = new Uint8Array(totalLength);
+    let pos = 0;
+    for (const c of chunks) {
+      result.set(c, pos);
+      pos += c.length;
+    }
+    return result;
   }
 
   deleteDesign() {
