@@ -3288,14 +3288,16 @@ a {
   height: calc(100vh - 48px);
   overflow: hidden;
   position: relative;
+  width: 100%;
+  min-width: 0;
+  z-index: 0;
   box-sizing: border-box;
 }
 
 /* --- Left Sidebar (Tools, Layers, AI) --- */
 .figma-left-panel {
-  width: 280px;
-  min-width: 280px;
-  max-width: 280px;
+  max-width: min(320px, 32vw);
+  flex: 0 0 280px;
   background-color: #2c2c2c;
   border-right: 1px solid #383838;
   display: flex;
@@ -3334,8 +3336,13 @@ a {
 }
 
 .panel-content {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #656565 #2c2c2c;
   padding: 14px;
   display: flex;
   flex-direction: column;
@@ -3528,6 +3535,7 @@ a {
 .layer-item {
   display: flex;
   align-items: center;
+  min-width: 0;
   gap: 8px;
   padding: 6px 10px;
   border-radius: 6px;
@@ -3535,10 +3543,12 @@ a {
   border: 1px solid transparent;
   color: #cccccc;
   font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  cursor: grab;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   user-select: none;
 }
+.layer-item:active { cursor: grabbing; }
+.layer-item.drag-target { border-color: #0d99ff; box-shadow: inset 0 2px #0d99ff; }
 .layer-item:hover {
   background-color: #333333;
   color: #ffffff;
@@ -3641,7 +3651,9 @@ a {
 
 /* --- Center Canvas Viewport --- */
 .figma-canvas-viewport {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
   position: relative;
   background-color: #181818;
   background-image: radial-gradient(#2c2c2c 1px, transparent 1px);
@@ -3737,6 +3749,10 @@ a {
   inset: -3px;
   pointer-events: none;
 }
+.figma-selection-handles { z-index: 6; }
+.canvas-text.selected { cursor: grab; }
+.canvas-text.selected .text-content-inner { cursor: grab; }
+.canvas-text.selected .text-content-inner:focus { cursor: text; user-select: text; }
 .figma-rotate-handle {
   position: absolute;
   top: -26px;
@@ -3804,12 +3820,16 @@ a {
 
 /* --- Right Sidebar (Properties Inspector) --- */
 .figma-inspector {
-  width: 300px;
-  min-width: 300px;
-  max-width: 300px;
+  width: min(300px, 28vw);
+  min-width: 250px;
+  max-width: 320px;
+  min-height: 0;
   background-color: #2c2c2c;
   border-left: 1px solid #383838;
-  overflow-y: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #656565 #2c2c2c;
   display: flex;
   flex-direction: column;
   z-index: 10;
@@ -4001,7 +4021,25 @@ a {
   padding: 0 4px;
 }
 
-/* --- Print / PDF Mode --- */
+/* --- Movable Figma toolbar and responsive canvas layout --- */
+@media (max-width: 1100px) {
+  .figma-topbar { gap: 8px; padding-inline: 8px; }
+  .topbar-left, .topbar-right { gap: 5px; }
+  .topbar-center { gap: 6px; min-width: 0; }
+  .figma-left-panel { flex-basis: 240px; }
+  .figma-inspector { min-width: 220px; width: 24vw; }
+  .topbar-right .figma-btn { padding: 6px 8px; }
+}
+@media (max-width: 760px) {
+  .figma-topbar { flex-wrap: wrap; height: auto; min-height: 48px; padding-block: 6px; }
+  .figma-workspace { height: calc(100vh - 88px); }
+  .figma-left-panel { flex-basis: 210px; }
+  .figma-inspector { display: none; }
+  .figma-dock.dock-floating { max-width: calc(100vw - 16px); }
+}
+
+/* Keep the editor layout within the available viewport without overlapping. */
+
 /* Studio print rule unified */
 
 
@@ -4423,8 +4461,13 @@ a {
    FIGMA DOCK & PEN TOOL (VECTOR TRACING & CLIPPING MASK)
    ========================================================================== */
 
-/* Topbar Center Dock */
+/* Workspace toolbar: docked at the bottom by default, freely movable within workspace. */
 .figma-dock {
+  position: absolute;
+  z-index: 80;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
   background: #1e1e1e;
@@ -4433,7 +4476,36 @@ a {
   padding: 3px 4px;
   gap: 2px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  max-width: min(94vw, 680px);
+  overflow: auto;
+  touch-action: none;
 }
+
+.figma-dock.dock-floating {
+  position: absolute;
+  z-index: 90;
+  bottom: auto;
+  margin: 0;
+  transform: none;
+  max-width: min(94vw, calc(100% - 16px));
+}
+
+.dock-drag-handle {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid #383838;
+  border-radius: 4px 0 0 4px;
+  background: transparent;
+  color: #8b8b8b;
+  cursor: grab;
+  touch-action: none;
+}
+.dock-drag-handle:active { cursor: grabbing; }
+.topbar-center { gap: 12px; min-width: 0; }
+.figma-workspace { padding-bottom: 68px; }
 
 .figma-dock-item {
   background: transparent;
@@ -5225,8 +5297,10 @@ a {
 
 .pdf-viewer-body {
   display: flex;
-  flex: 1;
-  overflow: hidden;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
   background: #2b2b30;
 }
 
@@ -5250,7 +5324,8 @@ a {
 }
 
 .pdf-thumbnail-list {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   padding: 10px;
   display: flex;
@@ -5779,7 +5854,8 @@ a {
 }
 
 .pdf-grid-stage {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   padding: 20px;
   background: #25252a;
@@ -6210,4 +6286,37 @@ a {
   .crop-mark.top-right { top: 0; right: 0; border-width: 1.5px 1.5px 0 0 !important; }
   .crop-mark.bottom-left { bottom: 0; left: 0; border-width: 0 0 1.5px 1.5px !important; }
   .crop-mark.bottom-right { bottom: 0; right: 0; border-width: 0 1.5px 1.5px 0 !important; }
+}
+
+
+/* Figma-style two-axis scrolling for both editor side panels. */
+.figma-left-panel,
+.figma-inspector {
+  min-height: 0;
+  min-width: 0;
+}
+
+.figma-left-panel .panel-content,
+.figma-inspector {
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.figma-left-panel .panel-content > *,
+.figma-inspector > * {
+  flex-shrink: 0;
+}
+
+.figma-left-panel .panel-content::-webkit-scrollbar,
+.figma-inspector::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.figma-left-panel .panel-content::-webkit-scrollbar-thumb,
+.figma-inspector::-webkit-scrollbar-thumb {
+  background: #606060;
+  border: 2px solid #2c2c2c;
+  border-radius: 8px;
 }

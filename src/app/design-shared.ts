@@ -1,0 +1,1 @@
+export const Mark = `<svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M9 8h14c7 0 11 4 11 10 0 4-2 7-6 8l7 7H23l-6-7h-1v7H9V8Zm7 7v5h7c2 0 3-1 3-3s-1-2-3-2h-7Z" fill="currentColor"/><circle cx="9" cy="33" r="2" fill="#E1F16B"/></svg>`;
