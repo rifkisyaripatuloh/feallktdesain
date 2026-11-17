@@ -1,4 +1,5 @@
 import { Component, inject, signal, computed, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -317,9 +318,43 @@ import { Mark } from './design-shared';
 
                   <div class="ai-action-buttons-row">
                     <button type="button" class="figma-btn ai-btn full-width" (click)="recommendStyle()" [disabled]="aiBusyState()">
-                      <span>✦ Analisis & Rekomendasikan AI</span>
+                      <span>{{ aiBusyState() ? '✦ AI sedang merancang…' : '✦ Rekomendasikan & Buat Desain Lengkap' }}</span>
                     </button>
                   </div>
+
+                  @if (aiDrafts().length) {
+                    <div class="section-title mt-3">PILIH HASIL GENERATE</div>
+                    <p class="theme-card-desc">{{ aiDraftWarning() || 'Bandingkan alternatif, pilih yang paling cocok, lalu edit objeknya di kanvas.' }}</p>
+                    <div class="ai-generated-list">
+                      @for (draft of aiDrafts(); track draft.id) {
+                        <article class="ai-generated-card" [class.selected]="aiSelectedDraftId() === draft.id">
+                          <div class="ai-generated-card-head">
+                            <div><strong>{{ draft.name }}</strong><small>{{ aiDraftModel() }} · {{ draft.config.elements.length }} objek</small></div>
+                            <button type="button" class="ai-cat-chip" [class.active]="aiSelectedDraftId() === draft.id" (click)="aiSelectedDraftId.set(draft.id)">{{ aiSelectedDraftId() === draft.id ? 'Dipilih' : 'Preview' }}</button>
+                          </div>
+            <div class="ai-ticket-preview" [style.background]="draft.config.canvas.background || '#f4f1e8'" [style.background-image]="draft.config.canvas.backgroundImage ? 'url(' + draft.config.canvas.backgroundImage + ')' : null" [style.aspect-ratio]="design()!.width + '/' + design()!.height">
+                            @for (el of draft.config.elements; track el.id) {
+                              @if (el.type === 'text') {
+                                <span class="ai-preview-text" [style.left.%]="el.x / design()!.width * 100" [style.top.%]="el.y / design()!.height * 100" [style.width.%]="number(el['width'], design()!.width * .55) / design()!.width * 100" [style.font-size.px]="Math.max(5, number(el['fontSize'], 18) * aiPreviewScale())" [style.font-weight]="el['fontWeight'] || 600" [style.color]="el['color'] || '#1e293b'" [style.font-family]="el['fontFamily'] || 'DM Sans'">{{ el['text'] }}</span>
+                              } @else if (el.type === 'image') {
+                                <img class="ai-preview-image" [src]="el['src']" alt="Ilustrasi tiket" [style.left.%]="el.x / design()!.width * 100" [style.top.%]="el.y / design()!.height * 100" [style.width.%]="number(el['width'], 100) / design()!.width * 100" [style.height.%]="number(el['height'], 70) / design()!.height * 100" [style.object-fit]="el['fit'] || 'cover'" [style.filter]="el['tint'] ? 'saturate(0.8) drop-shadow(0 0 10px ' + el['tint'] + ')' : null" />
+                              } @else if (el.type === 'svg') {
+                                <div class="ai-preview-svg" [style.left.%]="el.x / design()!.width * 100" [style.top.%]="el.y / design()!.height * 100" [style.width.%]="number(el['width'], 90) / design()!.width * 100" [style.height.%]="number(el['height'], 60) / design()!.height * 100" [innerHTML]="sanitizeAiSvg(el['svg'] || el['content'])"></div>
+                              } @else if (el.type === 'qr') {
+                                <span class="ai-preview-qr" [style.left.%]="el.x / design()!.width * 100" [style.top.%]="el.y / design()!.height * 100" [style.width.%]="number(el['width'], 80) / design()!.width * 100" [style.height.%]="number(el['height'], 80) / design()!.height * 100">▦</span>
+                              } @else if (el.type === 'rectangle' || el.type === 'circle' || el.type === 'line') {
+                                <span class="ai-preview-shape" [class.circle]="el.type === 'circle'" [style.left.%]="el.x / design()!.width * 100" [style.top.%]="el.y / design()!.height * 100" [style.width.%]="number(el['width'], 40) / design()!.width * 100" [style.height.%]="number(el['height'], 20) / design()!.height * 100" [style.background]="el['fill'] || el['color'] || '#2563eb'"></span>
+                              } @else if (el.type === 'background') {
+                                <span class="ai-preview-shape" [style.inset.px]="0" [style.background]="el['fill']" style="z-index:0"></span>
+                              }
+                            }
+                          </div>
+                          <button type="button" class="figma-btn-primary full-width mt-1" (click)="applyAiDraft(draft.id)">✓ Pakai style ini</button>
+                        </article>
+                      }
+                    </div>
+                    <button type="button" class="figma-btn full-width mt-1" (click)="discardAiDraft()">Buang semua hasil</button>
+                  }
 
                   @if (aiSelectedTheme()) {
                     <div class="ai-theme-preview-card">
@@ -1700,6 +1735,7 @@ export class TicketEditorComponent implements OnDestroy {
   canRedo = computed(() => this.historyIndex() >= 0 && this.historyIndex() < this.history.length - 1);
 
   private api = inject(DesignsApi);
+  private sanitizer = inject(DomSanitizer);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
@@ -1725,6 +1761,10 @@ export class TicketEditorComponent implements OnDestroy {
   aiBrief = '';
   aiStyle = signal<{ name: string; description: string; background: string; accent: string; ink: string; font: string } | null>(null);
   aiBusyState = signal(false);
+  aiDrafts = signal<Array<{ id: string; name: string; config: DesignConfig }>>([]);
+  aiSelectedDraftId = signal('');
+  aiDraftModel = signal('');
+  aiDraftWarning = signal('');
 
   printModalOpen = signal(false);
   printCount = signal(10);
@@ -2854,77 +2894,186 @@ export class TicketEditorComponent implements OnDestroy {
   }
 
   recommendStyle() {
-    const brief = this.aiBrief.trim().toLowerCase();
-    let selected = ticketStyles[0];
-    if (/jazz|elegan|mewah|undang|vip/.test(brief)) selected = ticketStyles[1];
-    else if (/festival|ceria|warna|party/.test(brief)) selected = ticketStyles[2];
-    else if (/konser|malam|gelap|rock|neon/.test(brief)) selected = ticketStyles[3];
-    else if (/retro|vintage|klasik|poster/.test(brief)) selected = ticketStyles[4];
-    else if (/bisnis|formal|kantor|perusahaan/.test(brief)) selected = ticketStyles[5];
-
-    this.aiStyle.set({
-      name: selected.label,
-      description: `Rekomendasi gaya berdasarkan brief "${this.aiBrief}". ${selected.description}`,
-      background: selected.background,
-      accent: selected.accent,
-      ink: selected.ink,
-      font: selected.font
-    });
-  }
-
-  applyStyle() {
-    const style = this.aiStyle();
-    if (!style) return;
-    this.background.set(style.background);
-    this.mutate(d => {
-      d.config.canvas.background = style.background;
-      const bg = d.config.elements.find(x => x.type === 'background');
-      if (bg) bg['fill'] = style.background;
-      for (const el of d.config.elements) {
-        if (el.type === 'text') {
-          el['fontFamily'] = style.font;
-          el['color'] = style.ink;
-        }
-        if (el.type === 'rectangle' || el.type === 'circle') {
-          el['fill'] = style.accent;
-        }
-      }
-    });
-  }
-
-  generateAiDraft() {
     const d = this.design();
-    if (!d) return;
-    const prompt = this.aiBrief.trim() || `Improve this ${d.type} ticket design with professional typography and clear hierarchy.`;
+    if (!d || this.aiBusyState()) return;
+    const brief = this.aiBrief.trim();
+    const selectedTheme = this.aiSelectedTheme();
+    const imageMood = this.inferImageMood(`${brief} ${selectedTheme?.name || ''} ${selectedTheme?.category || ''}`);
+    const imagePrompt = `Create a cohesive editorial ticket illustration: ${imageMood}. Subject: ${brief || selectedTheme?.name || d.type}. Artwork only, no words, no letters, no logos, no QR codes. High contrast with palette harmonious with ${selectedTheme?.background || 'the ticket background'} and ${selectedTheme?.accent || 'the accent color'}, clean composition with focal point near the right half. Wide landscape ticket artwork, suitable as a decorative cropped panel.`;
+    const prompt = [
+      `Buat rekomendasi dan komposisi desain tiket ${d.type}.`,
+      brief ? `Brief pengguna: ${brief}` : 'Buat konsep visual yang kuat dan profesional sesuai kategori tiket.',
+      selectedTheme ? `Arah tema yang dipilih pengguna: ${selectedTheme.name} (${selectedTheme.description}); palet ${selectedTheme.background}, ${selectedTheme.accent}, teks ${selectedTheme.ink}; gaya ${selectedTheme.ticketStyle}.` : '',
+      'Hasilkan satu layout tiket lengkap, berhierarki dan siap diedit sebagai objek terpisah di kanvas.'
+    ].filter(Boolean).join('\n');
+    this.aiDrafts.set([]);
+    this.aiDraftWarning.set('');
     this.aiBusyState.set(true);
     this.error.set('');
-
-    this.api.generate({
-      prompt,
-      type: d.type,
-      width: d.width,
-      height: d.height,
-      unit: d.unit,
-      designId: d.id
-    }).subscribe({
-      next: r => {
-        this.aiBusyState.set(false);
-        this.design.update(cur => cur ? { ...cur, config: r.data.config } : cur);
-        this.background.set(r.data.config.canvas.background || '#f4f1e8');
-        this.backgroundImage.set(String(r.data.config.canvas.backgroundImage || ''));
-        this.selectedId.set('');
-        this.scheduleSave();
-        if (!r.data.aiAvailable) {
-          this.error.set(r.data.warning || 'Backend memakai template dasar lokal (Ollama tidak aktif).');
-        } else if (r.data.warning) {
-          this.error.set(r.data.warning);
-        }
+    this.api.generate({ prompt, type: d.type, width: d.width, height: d.height, unit: d.unit, designId: d.id }).subscribe({
+      next: response => {
+        const result = response.data;
+        const config = this.normalizeAiConfig(result.config, d);
+        this.generateArtwork(imagePrompt).then(artwork => {
+          if (artwork) this.addArtworkToConfig(config, artwork, d.width, d.height, imageMood);
+          const variations = this.makeAiVariations(config, d.type, brief || selectedTheme?.name || 'Tiket');
+          this.aiDrafts.set(variations);
+          this.aiSelectedDraftId.set(variations[0]?.id || '');
+          this.aiDraftModel.set(`${result.model || (result.aiAvailable ? 'LLM' : 'Template lokal')}${artwork ? ' + Ilustrasi' : ''}`);
+          this.aiDraftWarning.set(result.warning || (artwork ? '' : 'Ilustrasi AI tidak tersedia; template menampilkan visual dekoratif bawaan. Atur OLLAMA_IMAGE_MODEL di backend untuk model ilustrasi lokal.'));
+          this.aiBusyState.set(false);
+        }).catch(() => {
+          this.aiBusyState.set(false);
+          this.aiDraftWarning.set('Layout sudah dibuat, tetapi layanan ilustrasi lokal belum aktif.');
+        });
       },
       error: e => {
         this.aiBusyState.set(false);
-        this.error.set(messageOf(e, 'Generate AI gagal. Periksa koneksi backend dan login.'));
+        this.error.set(messageOf(e, 'Rekomendasi AI gagal. Periksa koneksi backend dan login.'));
       }
     });
+  }
+
+  sanitizeAiSvg(source: unknown): SafeHtml {
+    const svg = String(source || '');
+    if (!/^\s*<svg[\s>]/i.test(svg) || /<script|<foreignObject|\son\w+\s*=|(?:href|src)\s*=\s*["']\s*(?:https?:|javascript:|data:)/i.test(svg)) return '';
+    return this.sanitizer.bypassSecurityTrustHtml(svg);
+  }
+
+  private normalizeAiConfig(config: DesignConfig, current: Design): DesignConfig {
+    const width = current.width;
+    const height = current.height;
+    const elements = (Array.isArray(config?.elements) ? config.elements : []).slice(0, 100).map((source, index) => {
+      const el = structuredClone(source);
+      el.id = typeof el.id === 'string' && el.id ? `${el.id}-${crypto.randomUUID().slice(0, 8)}` : crypto.randomUUID();
+      el.x = Math.max(0, Math.min(width - 1, Number.isFinite(el.x) ? el.x : 0));
+      el.y = Math.max(0, Math.min(height - 1, Number.isFinite(el.y) ? el.y : 0));
+      if (el.type === 'qr') {
+        el['value'] = String(el['value'] || `TICKET-${index + 1}`);
+        delete el['qrDataUrl'];
+      }
+      if (el.type === 'image') {
+        el['imagePrompt'] = String(el['imagePrompt'] || '');
+        el['src'] = typeof el['src'] === 'string' ? el['src'] : '';
+        el['fit'] = el['fit'] || 'cover';
+      }
+      if (el.type === 'svg') {
+        el['svg'] = this.sanitizeAiSvg(el['svg'] || el['content']);
+      }
+      return el;
+    });
+    return { ...structuredClone(config), type: current.type, canvas: { ...config.canvas, width, height, unit: current.unit || config.canvas?.unit, background: config.canvas?.background || '#f4f1e8' }, elements };
+  }
+
+  private inferImageMood(text: string): string {
+    const value = text.toLowerCase();
+    if (/rock|metal|konser|concert|musik|festival/.test(value)) return 'dramatic live music festival with silhouetted performer, beams of stage light, subtle crowd, cinematic grain';
+    if (/sport|lari|marathon|football|basket|fitness/.test(value)) return 'dynamic sporting event, energetic stadium lights, motion trails and abstract athletic silhouettes';
+    if (/wedding|nikah|pernikahan|undangan|gala|elegan/.test(value)) return 'elegant floral botanical illustration with refined paper texture and warm gold light';
+    if (/tech|teknologi|seminar|conference|bisnis/.test(value)) return 'modern technology summit, abstract architectural lines, luminous blue gradients and subtle geometric forms';
+    if (/film|cinema|movie/.test(value)) return 'cinematic premiere, dramatic spotlight, film-inspired abstract texture and deep red accents';
+    return 'immersive event atmosphere with refined abstract shapes, subtle texture, tasteful lighting and a clear uncluttered focal area';
+  }
+
+  private async generateArtwork(prompt: string): Promise<string | null> {
+    try {
+      const response = await this.api.generateArtwork({ prompt }).toPromise();
+      return response?.data?.src || null;
+    } catch {
+      return null;
+    }
+  }
+
+  private addArtworkToConfig(config: DesignConfig, src: string, width: number, height: number, mood: string) {
+    const imageWidth = Math.round(width * 0.36);
+    const imageHeight = Math.round(height * 0.72);
+    config.elements.push({
+      id: `ai-art-${crypto.randomUUID()}`, type: 'image', name: `Ilustrasi AI · ${mood.split(',')[0]}`,
+      x: Math.round(width - imageWidth - width * 0.035), y: Math.round(height * 0.14),
+      width: imageWidth, height: imageHeight, src, fit: 'cover', rotation: 0
+    });
+  }
+
+  private makeAiVariations(config: DesignConfig, type: DesignType, brief: string) {
+    const variants = [
+      { id: 'original', name: 'Rekomendasi AI' },
+      { id: 'midnight', name: 'Midnight · Premium', bg: '#111827', accent: '#f59e0b', ink: '#f8fafc' },
+      { id: 'editorial', name: 'Editorial · Elegan', bg: '#fff7ed', accent: '#b45309', ink: '#292524' },
+      { id: 'vibrant', name: 'Vibrant · Modern', bg: '#fdf2f8', accent: '#db2777', ink: '#1f2937' }
+    ];
+    const original = structuredClone(config);
+    const originalBg = String(original.canvas.background || '#f4f1e8');
+    const imageIds = original.elements.filter(el => el.type === 'image').map(el => el.id);
+    for (const el of original.elements) if (el.type === 'image') original.elements.splice(original.elements.indexOf(el), 1);
+    return variants.map(variant => {
+      const copy = structuredClone(original);
+      if (variant.bg) copy.canvas.background = variant.bg;
+      const textElements = copy.elements.filter(el => el.type === 'text');
+      const shapeElements = copy.elements.filter(el => el.type === 'rectangle' || el.type === 'circle' || el.type === 'line');
+      const accent = variant.accent || '#2563eb';
+      const ink = variant.ink || '#0f172a';
+      const recoloredImages = config.elements.filter(el => el.type === 'image' && imageIds.includes(el.id)).map(image => {
+        const recolored = structuredClone(image);
+        recolored.id = `${image.id}-${variant.id}`;
+        recolored['tint'] = accent;
+        return recolored;
+      });
+      for (const el of copy.elements) {
+        if (el.type === 'background') el['fill'] = variant.bg || copy.canvas.background || '#f4f1e8';
+        if (el.type === 'text') {
+          const content = String(el['text'] || '').toLowerCase();
+          el['color'] = /tanggal|lokasi|date|scan|akses|access|no\\.? tiket/.test(content) ? accent : ink;
+          el['fontFamily'] = variant.id === 'editorial' && /judul|undangan|invitation/.test(String(el['name'] || '').toLowerCase()) ? 'Georgia' : 'DM Sans';
+          if (variant.id !== 'original') el['fontWeight'] = /judul|title|kategori|category/.test(String(el['name'] || '').toLowerCase()) ? 700 : el['fontWeight'] || 500;
+        }
+        if (el.type === 'rectangle' || el.type === 'circle' || el.type === 'line') el['fill'] = accent;
+        if (el.type === 'qr') {
+          el['color'] = ink;
+          el['qrBackground'] = variant.bg || copy.canvas.background || '#ffffff';
+          delete el['qrDataUrl'];
+        }
+      }
+      if (variant.id !== 'original' && textElements.length > 1 && shapeElements.length === 0) {
+        const width = copy.canvas.width;
+        const height = copy.canvas.height;
+        copy.elements.splice(1, 0, { id: `variant-accent-${variant.id}`, type: 'rectangle', name: 'Aksen visual', x: 0, y: 0, width: Math.max(8, Math.round(width * 0.025)), height, fill: accent });
+      }
+      if (recoloredImages.length) {
+        const qrIndex = copy.elements.findIndex(el => el.type === 'qr');
+        copy.elements.splice(qrIndex < 0 ? copy.elements.length : qrIndex, 0, ...recoloredImages);
+      }
+      const label = type.replaceAll('_', ' ').toLowerCase();
+      return { id: variant.id, name: `${variant.name} · ${label}`, config: copy };
+    });
+  }
+
+  aiPreviewScale() {
+    const d = this.design();
+    if (!d) return 0.15;
+    return Math.min(0.16, 260 / d.width);
+  }
+
+  applyAiDraft(id: string) {
+    const draft = this.aiDrafts().find(item => item.id === id);
+    if (!draft) return;
+    const config = structuredClone(draft.config);
+    this.mutate(d => { d.config = config; });
+    this.background.set(config.canvas.background || '#f4f1e8');
+    this.backgroundImage.set(String(config.canvas.backgroundImage || ''));
+    this.backgroundMask.set(String(config.canvas.backgroundMask || 'none'));
+    this.selectedId.set('');
+    this.aiDrafts.set([]);
+    for (const el of config.elements) if (el.type === 'qr') this.generateQr(el);
+  }
+
+  discardAiDraft() {
+    this.aiDrafts.set([]);
+    this.aiDraftWarning.set('');
+    this.aiSelectedDraftId.set('');
+  }
+
+  generateAiDraft() {
+    this.recommendStyle();
   }
 
   printPdf() {
